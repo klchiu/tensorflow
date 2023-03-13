@@ -53,6 +53,7 @@ cc_library_with_tflite(
         ":gpu_delegate_provider",
         ":hexagon_delegate_provider",
         ":nnapi_delegate_provider",
+        ":esp_delegate_provider",   # [humu]
         "//tensorflow/lite/tools/delegates/experimental/stable_delegate:delegate_provider",
     ],
     alwayslink = 1,
@@ -113,6 +114,18 @@ cc_library(
         "//tensorflow/lite/nnapi:nnapi_util",
         "//tensorflow/lite/nnapi/sl:nnapi_support_library",
         "//tensorflow/lite/nnapi/sl:nnapi_support_library_headers",
+    ],
+    alwayslink = 1,
+)
+
+# [humu]
+cc_library(
+    name = "esp_delegate_provider",
+    srcs = ["esp_delegate_provider.cc"],
+    copts = common_copts,
+    deps = [
+        ":delegate_provider_hdr",
+        "//tensorflow/lite/delegates/esp:esp_delegate",
     ],
     alwayslink = 1,
 )

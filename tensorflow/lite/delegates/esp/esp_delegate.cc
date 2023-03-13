@@ -7,6 +7,29 @@
 
 #include "tensorflow/lite/delegates/utils/simple_delegate.h"
 
+#include "tensorflow/lite/builtin_ops.h"
+
+#include "tensorflow/lite/core/c/c_api_types.h"
+#include "tensorflow/lite/delegates/serialization.h"
+#include "tensorflow/lite/logger.h"
+
+#include "tensorflow/lite/allocation.h"
+#include "tensorflow/lite/builtin_op_data.h"
+#include "tensorflow/lite/builtin_ops.h"
+#include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/context_util.h"
+#include "tensorflow/lite/core/c/builtin_op_data.h"
+#include "tensorflow/lite/delegates/utils.h"
+#include "tensorflow/lite/kernels/internal/utils/sparsity_format_converter.h"
+#include "tensorflow/lite/kernels/kernel_util.h"
+#include "tensorflow/lite/minimal_logging.h"
+#include "tensorflow/lite/util.h"
+
+
+
+#include "tensorflow/lite/kernels/internal/compatibility.h"
+#include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
+
 namespace tflite {
 namespace esp_test {
 
@@ -106,10 +129,27 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
     auto* input_2 = GetTensorData<float>(input_tensor_2);
     auto* output = GetTensorData<float>(output_tensor);
     for (int i = 0; i < NumElements(input_tensor_1); ++i) {
-      if (builtin_code == kTfLiteBuiltinAdd)
+      if (builtin_code == kTfLiteBuiltinAdd){
         output[i] = input_1[i] + input_2[i];
-      else
+        printf("[humu]: ESP ComputeResult: kTfLiteBuiltinAdd\n");
+      }
+      if (builtin_code == kTfLiteBuiltinSub){
         output[i] = input_1[i] - input_2[i];
+        printf("[humu]: ESP ComputeResult: kTfLiteBuiltinSub\n");
+      }
+
+      if (builtin_code == kTfLiteBuiltinReshape){
+        printf("[humu]: ESP ComputeResult: kTfLiteBuiltinReshape\n");
+      }
+
+      if (builtin_code == kTfLiteBuiltinConv2d){
+        printf("[humu]: ESP ComputeResult: kTfLiteBuiltinConv2d\n");
+      }
+
+      if (builtin_code == kTfLiteBuiltinFullyConnected){
+        printf("[humu]: ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
+      }
+
     }
     return kTfLiteOk;
   }
@@ -141,8 +181,11 @@ class EspDelegate : public SimpleDelegateInterface {
                                  const TfLiteNode* node,
                                  TfLiteContext* context) const override {
     // Only supports Add and Sub ops.
-    if (kTfLiteBuiltinAdd != registration->builtin_code &&
-        kTfLiteBuiltinSub != registration->builtin_code)
+    if (registration->builtin_code != kTfLiteBuiltinAdd &&
+        registration->builtin_code != kTfLiteBuiltinSub &&
+        registration->builtin_code != kTfLiteBuiltinReshape &&
+        registration->builtin_code != kTfLiteBuiltinConv2d &&
+        registration->builtin_code != kTfLiteBuiltinFullyConnected )
       return false;
 
     // This delegate only supports float32 types.
