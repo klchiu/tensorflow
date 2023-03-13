@@ -70,6 +70,7 @@ option(TFLITE_ENABLE_MMAP "Enable MMAP (unsupported on Windows)" ON)
 option(TFLITE_ENABLE_GPU "Enable GPU" OFF)
 option(TFLITE_ENABLE_METAL "Enable Metal delegate (iOS only)" OFF)
 option(TFLITE_ENABLE_XNNPACK "Enable XNNPACK backend" ON)
+option(TFLITE_ENABLE_ESP "Enable ESP backend" OFF)  # [humu]
 option(TFLITE_ENABLE_EXTERNAL_DELEGATE "Enable External Delegate backend" ON)
 
 option(TFLITE_KERNEL_TEST "Enable tflite kernel unit test" OFF)
@@ -436,6 +437,22 @@ if(TFLITE_ENABLE_XNNPACK)
   )
   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
 endif()
+
+# [humu]
+if(TFLITE_ENABLE_ESP)
+  find_package(fp16_headers REQUIRED)
+  # find_package(ESP REQUIRED)
+  populate_tflite_source_vars("delegates/esp"
+    TFLITE_DELEGATES_ESP_SRCS
+    FILTER ".*(_test|_tester)\\.(cc|h)"
+  )
+  list(APPEND TFLITE_TARGET_DEPENDENCIES
+    ESP
+  )
+  list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_ESP_DELEGATE")
+endif()
+
+
 if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
   populate_tflite_source_vars("delegates/external"
     TFLITE_DELEGATES_EXTERNAL_SRCS
@@ -518,6 +535,7 @@ set(_ALL_TFLITE_SRCS
   ${TFLITE_DELEGATES_NNAPI_SRCS}
   ${TFLITE_DELEGATES_SRCS}
   ${TFLITE_DELEGATES_XNNPACK_SRCS}
+  ${TFLITE_DELEGATES_ESP_SRCS}  # [humu]
   ${TFLITE_DELEGATES_EXTERNAL_SRCS}
   ${TFLITE_EXPERIMENTAL_REMAT_SRCS}
   ${TFLITE_EXPERIMENTAL_RESOURCE_SRCS}

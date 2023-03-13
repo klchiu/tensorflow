@@ -36,6 +36,7 @@ list(APPEND TFLITE_LABEL_IMAGE_SRCS
 if(TFLITE_ENABLE_XNNPACK)
   list(APPEND TFLITE_LABEL_IMAGE_SRCS
     ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
+    ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/xnnpack_plugin.cc
   )
 else()
   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_XNNPACK")
@@ -65,4 +66,10 @@ target_compile_options(label_image
 )
 target_link_libraries(label_image
   tensorflow-lite
+  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libmonitors.a
+  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libesp.a
+  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libutils.a
+  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libtest.a
+  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libcontig.a
+
 )

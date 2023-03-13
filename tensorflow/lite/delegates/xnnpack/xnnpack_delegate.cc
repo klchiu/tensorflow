@@ -978,6 +978,9 @@ class Subgraph {
   TfLiteStatus Prepare(TfLiteContext* context) { return kTfLiteOk; }
 
   TfLiteStatus Invoke(TfLiteContext* context) {
+
+printf("[humu]: XNNPACK Invoke: debug 0\n");
+
     bool any_pointers_changed = false;
     for (std::pair<int, void*> io_info : externals_) {
       const TfLiteTensor& tensor = context->tensors[io_info.first];
@@ -997,6 +1000,8 @@ class Subgraph {
         externals_[io_info.first] = data_pointer;
       }
     }
+
+printf("[humu]: XNNPACK Invoke: debug 1\n");
 
     // Even with no externals, we need to setup the runtime if there are
     // variables.
@@ -1018,7 +1023,12 @@ class Subgraph {
       variables_set_up_ = true;
     }
 
+printf("[humu]: XNNPACK Invoke: debug 2\n");
+
     xnn_status status = xnn_invoke_runtime(runtime_.get());
+
+printf("[humu]: XNNPACK Invoke: debug 3\n");
+
     if (status != xnn_status_success) {
       TF_LITE_KERNEL_LOG(context, "failed to invoke XNNPACK runtime");
       return kTfLiteError;
@@ -1031,6 +1041,9 @@ class Subgraph {
                            "failed to get XNNPACK profile information.");
       }
     }
+
+printf("[humu]: XNNPACK Invoke: debug 4\n");
+
 
     return kTfLiteOk;
   }
@@ -2167,6 +2180,9 @@ class Subgraph {
     // messages are passed to TFLite. When we detect supported operations
     // (subgraph is null), logging context is null, and error messages are
     // supressed.
+  
+  printf("[humu]: XNNPACK VisitNode: debug 0\n");
+
     TfLiteContext* logging_context = subgraph == nullptr ? nullptr : context;
     switch (registration->builtin_code) {
       case kTfLiteBuiltinAbs:
@@ -2205,6 +2221,9 @@ class Subgraph {
       case kTfLiteBuiltinConv2d: {
         const TfLiteConvParams* conv_params =
             static_cast<const TfLiteConvParams*>(node->builtin_data);
+
+  printf("[humu]: XNNPACK VisitNode: kTfLiteBuiltinConv2d 0\n");
+
 
         return VisitConv2DNode(subgraph, delegate, logging_context, node_index,
                                node, context->tensors, conv_params,
@@ -2245,6 +2264,9 @@ class Subgraph {
       case kTfLiteBuiltinFullyConnected: {
         // FullyConnected with sparse weight has version 8, which cannot be
         // delegated to XNNPack.
+
+    printf("[humu]: XNNPACK VisitNode: kTfLiteBuiltinFullyConnected 0\n");
+
         if (registration->version == 8) {
           TF_LITE_MAYBE_KERNEL_LOG(logging_context,
                                    "Unsupported version %d of FullyConnected.",
@@ -2342,6 +2364,9 @@ class Subgraph {
       case kTfLiteBuiltinReshape: {
         const TfLiteReshapeParams* reshape_params =
             static_cast<const TfLiteReshapeParams*>(node->builtin_data);
+
+    printf("[humu]: XNNPACK VisitNode: kTfLiteBuiltinReshape 0\n");
+
 
         return VisitReshapeNode(subgraph, delegate, logging_context, node_index,
                                 node, context->tensors, reshape_params,
@@ -2891,6 +2916,9 @@ class Subgraph {
       const TfLiteTensor* tensors, const TfLiteConvParams* conv_params,
       const std::unordered_set<int>& quasi_static_tensors,
       const std::vector<uint32_t>& xnnpack_tensors) {
+
+  printf("[humu]: XNNPACK VisiVisitConv2DNodeNode  0\n");
+
     TF_LITE_ENSURE_STATUS(
         CheckConvolutionParams(logging_context, conv_params, node_index));
 

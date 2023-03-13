@@ -74,6 +74,7 @@ set(DELEGATE_PROVIDERS
   ${TFLITE_SOURCE_DIR}/tools/delegates/gpu_delegate_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/nnapi_delegate_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
+  ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc # [humu]
 )
 
 if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
@@ -115,6 +116,15 @@ if(TFLITE_ENABLE_XNNPACK)
     ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/xnnpack_plugin.cc)
 else()
   list(APPEND TEST_FRAMEWORK_OPTIONS "-DTFLITE_WITHOUT_XNNPACK")
+endif()
+
+# [humu]
+if(TFLITE_ENABLE_ESP)
+  list(APPEND TEST_FRAMEWORK_SRC
+    ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
+    ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/esp_plugin.cc)
+else()
+  list(APPEND TEST_FRAMEWORK_OPTIONS "-DTFLITE_WITHOUT_ESP")
 endif()
 
 # Base library to be later linked with the gtest OR gtest_main library
