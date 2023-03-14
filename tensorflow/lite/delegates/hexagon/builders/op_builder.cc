@@ -96,6 +96,8 @@ OpBuilder* GraphBuilder::CreateOpBuilderFromTfLiteOp(int op_type,
     case kTfLiteBuiltinMirrorPad:
       return CreateMirrorPadBuilder(this, OP_MirrorPad_8);
     case kTfLiteBuiltinFullyConnected: {
+      printf("[humu]: hexagon: CreateOpBuilderFromTfLiteOp: kTfLiteBuiltinFullyConnected\n");
+    
       const auto& weights_tensor = context_->tensors[node->inputs->data[1]];
       if (weights_tensor.allocation_type == kTfLiteMmapRo)
         return CreateMatMulWithConstWeightsOpBuilder(
@@ -116,8 +118,10 @@ OpBuilder* GraphBuilder::CreateOpBuilderFromTfLiteOp(int op_type,
           this, OP_QuantizedTransposeConv2d_8x8p32to8);
     case kTfLiteBuiltinDepthwiseConv2d:
       return CreateConv2DBuilder(this, OP_DepthwiseSupernode_8x8p32to8);
-    case kTfLiteBuiltinReshape:
+    case kTfLiteBuiltinReshape: {
+      printf("[humu]: hexagon: CreateOpBuilderFromTfLiteOp: kTfLiteBuiltinFullyConnected\n");
       return CreateReshapeBuilder(this, OP_Reshape);
+    }
     case kTfLiteBuiltinSoftmax:
       return CreateSoftmaxBuilder(this, OP_QuantizedSoftmax_8);
     case kTfLiteBuiltinResizeNearestNeighbor:

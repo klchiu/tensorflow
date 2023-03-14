@@ -440,7 +440,7 @@ endif()
 
 # [humu]
 if(TFLITE_ENABLE_ESP)
-  find_package(fp16_headers REQUIRED)
+  # find_package(fp16_headers REQUIRED)
   # find_package(ESP REQUIRED)
   populate_tflite_source_vars("delegates/esp"
     TFLITE_DELEGATES_ESP_SRCS

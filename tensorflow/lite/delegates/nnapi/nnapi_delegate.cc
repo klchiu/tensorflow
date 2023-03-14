@@ -2522,6 +2522,8 @@ bool NNAPIDelegateKernel::Validate(
       }
     } break;
     case kTfLiteBuiltinReshape: {
+      printf("[humu]: NNAPI: Validate: kTfLiteBuiltinReshape\n");
+
       ExpectOpVersion(version, 1, &val_ctx);
       if (android_sdk_version < kNNAPIRuntimeFeatureLevel6) {
         ExpectIsFloatOrQuant8Operator(context, node, &val_ctx);
@@ -3722,6 +3724,8 @@ TfLiteStatus NNAPIDelegateKernel::Map(
       *nn_op_type = ANEURALNETWORKS_SOFTMAX;
     } break;
     case kTfLiteBuiltinReshape: {
+      printf("[humu]: NNAPI: Map: kTfLiteBuiltinReshape\n");
+
       if (mapping_args.node->inputs->size == 1) {
         // if no new_shape tensor, construct the new shape from params.
         auto* params = reinterpret_cast<TfLiteReshapeParams*>(
