@@ -43,13 +43,15 @@ else()
   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_XNNPACK")
 endif()  # TFLITE_ENABLE_XNNPACK
 
-if(TFLITE_ENABLE_ESP)
-  list(APPEND TFLITE_LABEL_IMAGE_SRCS
-    ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
-  )
-else()
-  set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
-endif()  # TFLITE_ENABLE_XNNPACK
+
+# [humu]: need to check why adding this create TfLiteXnnpackDelegatePluginCApi issue
+# if(TFLITE_ENABLE_ESP)
+#   list(APPEND TFLITE_LABEL_IMAGE_SRCS
+#     ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
+#   )
+# else()
+#   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
+# endif()  # TFLITE_ENABLE_ESP
 
 if(CMAKE_SYSTEM_NAME MATCHES "Android")
   if(_TFLITE_ENABLE_NNAPI)
@@ -75,10 +77,9 @@ target_compile_options(label_image
 )
 target_link_libraries(label_image
   tensorflow-lite
-  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libmonitors.a
-  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libesp.a
-  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libutils.a
-  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libtest.a
-  # ${TENSORFLOW_SOURCE_DIR}/esp_libs/libcontig.a
-
+  # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libmonitors.a
+  # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libesp.a
+  # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libutils.a
+  # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libtest.a
+  # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libcontig.a
 )
