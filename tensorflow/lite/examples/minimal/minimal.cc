@@ -19,6 +19,15 @@ limitations under the License.
 #include "tensorflow/lite/model.h"
 #include "tensorflow/lite/optional_debug_tools.h"
 
+
+// #include "tensorflow/esp_libs/esp_api_include.h"
+
+// extern "C"{
+//     void esp_dummy(void *buf);
+//     void esp_free(void *buf);
+// }
+
+
 // This is an example that is minimal to read a model
 // from disk and perform inference. There is no data being loaded
 // that is up to you to add as a user.
@@ -71,6 +80,11 @@ int main(int argc, char* argv[]) {
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
   printf("\n\n=== Post-invoke Interpreter State ===\n");
   tflite::PrintInterpreterState(interpreter.get());
+
+
+// void *buf = NULL;
+// esp_dummy(buf);
+
 
   // Read output buffers
   // TODO(user): Insert getting data out code.

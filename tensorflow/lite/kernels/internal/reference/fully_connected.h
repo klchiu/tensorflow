@@ -45,6 +45,10 @@ inline void FullyConnected(
   const int output_depth = MatchingDim(weights_shape, weights_dims_count - 2,
                                        output_shape, output_dims_count - 1);
   const int accum_depth = weights_shape.Dims(weights_dims_count - 1);
+
+  printf("[humu]: FullyConnected debug 0\n");
+
+
   for (int b = 0; b < batches; ++b) {
     for (int out_c = 0; out_c < output_depth; ++out_c) {
       float total = 0.f;
@@ -90,6 +94,10 @@ inline void FullyConnected(
   const int output_depth = MatchingDim(filter_shape, filter_dim_count - 2,
                                        output_shape, output_dim_count - 1);
   const int accum_depth = filter_shape.Dims(filter_dim_count - 1);
+
+printf("[humu]: FullyConnected debug 1\n");
+
+  
   for (int b = 0; b < batches; ++b) {
     for (int out_c = 0; out_c < output_depth; ++out_c) {
       int32_t acc = 0;
@@ -137,6 +145,10 @@ inline void FullyConnected(
   const int output_depth = MatchingDim(filter_shape, filter_dim_count - 2,
                                        output_shape, output_dim_count - 1);
   const int accum_depth = filter_shape.Dims(filter_dim_count - 1);
+
+  printf("[humu]: FullyConnected debug 2\n");
+
+
   for (int b = 0; b < batches; ++b) {
     for (int out_c = 0; out_c < output_depth; ++out_c) {
       // Internal accumulation.
@@ -192,6 +204,9 @@ inline void ShuffledFullyConnected(
   const int accum_depth = weights_shape.Dims(weights_dim_count - 1);
   TFLITE_DCHECK((accum_depth % 16) == 0);
   TFLITE_DCHECK((output_depth % 4) == 0);
+
+  printf("[humu]: FullyConnected debug 3\n");
+
 
   // Shuffling and xoring of input activations into the workspace buffer
   uint8_t* shuffled_input_workspace_ptr = shuffled_input_workspace_data;

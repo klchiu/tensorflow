@@ -541,6 +541,9 @@ int Main(int argc, char** argv) {
 
   delegate_providers.MergeSettingsIntoParams(s);
   RunInference(&s, delegate_providers);
+
+printf("[humu]: label_image done\n");
+
   return 0;
 }
 

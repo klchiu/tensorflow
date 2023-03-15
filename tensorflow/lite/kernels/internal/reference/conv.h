@@ -61,6 +61,9 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  printf("[humu]: Conv debug 0\n");
+
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -150,6 +153,10 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   const int filters_per_group = output_depth / groups;
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
+  printf("[humu]: Conv debug 1\n");
+
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -237,6 +244,10 @@ inline void HybridConvPerChannel(
   const int filters_per_group = output_depth / groups;
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
+  printf("[humu]: Conv debug 2\n");
+
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       for (int out_x = 0; out_x < output_width; ++out_x) {
