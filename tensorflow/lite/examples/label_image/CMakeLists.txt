@@ -44,7 +44,8 @@ else()
 endif()  # TFLITE_ENABLE_XNNPACK
 
 
-# [humu]: need to check why adding this create TfLiteXnnpackDelegatePluginCApi issue
+# [humu]: need to check why adding this create TfLiteXnnpackDelegatePluginCApi 
+#         issue, when enabling XNNPACK
 # if(TFLITE_ENABLE_ESP)
 #   list(APPEND TFLITE_LABEL_IMAGE_SRCS
 #     ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
