@@ -94,9 +94,15 @@ class EigenTensorConvFunctor {
                   int output_width) {
     const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                 stride_rows == 1 && stride_cols == 1);
+
+// [humu]: invoke the accelerator here
+
+                              
     if (is_1x1_kernel) {
       // For 1x1 kernel, the 2D convolution is reduced to matrix
       // multiplication.
+        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 0\n");
+
       const int conv_width = output_height * output_width;
       Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
       dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
@@ -110,6 +116,8 @@ class EigenTensorConvFunctor {
                pad_width == 0 && pad_height == 0) {
       // If the input data and filter have the same height/width,
       // the 2D convolution is reduced to matrix multiplication.
+        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 1\n");
+
       const int k =  // Length of reduction dimension.
           filter_width * filter_height * input_depth;
       Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
@@ -120,6 +128,8 @@ class EigenTensorConvFunctor {
       MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
                                                       filter, dim_pair);
     } else {
+        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
+
       EigenTensor output(output_data, input_batches, output_height,
                          output_width, filter_count);
       ConstEigenTensor input(input_data, input_batches, input_height,
@@ -143,6 +153,9 @@ inline void Conv(const Eigen::ThreadPoolDevice& device,
   // Nest profiling under "Conv", to aggregate with other kernels.
   ruy::profiler::ScopeLabel label("Conv");
   ruy::profiler::ScopeLabel inner_label("Multithreaded EigenTensor");
+
+  printf("[humu]: multithreaded_conv.h: Conv 0\n");
+
 
   // im2col data should not be generated for the multi-thread supporting case.
   TFLITE_DCHECK(!im2col_data);
