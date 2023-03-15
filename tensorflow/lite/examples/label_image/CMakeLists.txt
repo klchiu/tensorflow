@@ -31,6 +31,7 @@ list(APPEND TFLITE_LABEL_IMAGE_SRCS
   ${TFLITE_SOURCE_DIR}/tools/delegates/delegate_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
   ${TFLITE_SOURCE_DIR}/tools/tool_params.cc
+  # ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/xnnpack_plugin.cc
 )
 
 if(TFLITE_ENABLE_XNNPACK)
@@ -50,13 +51,13 @@ else()
   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
 endif()  # TFLITE_ENABLE_XNNPACK
 
-# if(CMAKE_SYSTEM_NAME MATCHES "Android")
+if(CMAKE_SYSTEM_NAME MATCHES "Android")
   if(_TFLITE_ENABLE_NNAPI)
     list(APPEND TFLITE_LABEL_IMAGE_SRCS
       ${TFLITE_SOURCE_DIR}/tools/delegates/nnapi_delegate_provider.cc
     )
   endif()  # _TFLITE_ENABLE_NNAPI
-# endif()  # Android
+endif()  # Android
 
 if(TFLITE_ENABLE_GPU)
   list(APPEND TFLITE_LABEL_IMAGE_SRCS
