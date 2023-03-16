@@ -33,6 +33,16 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/optimized/optimized_ops.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 
+
+// [humu]: include this header file for using ESP APIs
+#define __FIXED
+#define BITWIDTH 32
+#include "tensorflow/esp_libs/esp_api_include.h"
+#include "tensorflow/esp_libs/cfg_conv2d.h"
+#include "tensorflow/esp_libs/conv2d_helper.h"
+
+
+
 namespace tflite {
 namespace multithreaded_ops {
 
@@ -92,12 +102,106 @@ class EigenTensorConvFunctor {
                   int stride_cols, int pad_width, int pad_height,
                   PaddingType padding, T* output_data, int output_height,
                   int output_width) {
+    
+// [humu]: invoke the accelerator here
+
+
+// printf("const T* input_data   = %d\n", *input_data);
+// printf("int input_batches     = %d\n", input_batches);
+// printf("int input_height      = %d\n", input_height);
+// printf("int input_width       = %d\n", input_width);
+// printf("int input_depth       = %d\n", input_depth);
+// printf("const T* filter_data  = %d\n", *filter_data);
+// printf("int filter_height     = %d\n", filter_height);
+// printf("int filter_width      = %d\n", filter_width);
+// printf("int filter_count      = %d\n", filter_count);
+// printf("int stride_rows       = %d\n", stride_rows);
+// printf("int stride_cols       = %d\n", stride_cols);
+// printf("int pad_width         = %d\n", pad_width);
+// printf("int pad_height        = %d\n", pad_height);
+// printf("PaddingType padding   = %d\n", padding);
+// printf("T* output_data        = %d\n", *output_data);
+// printf("int output_height     = %d\n", output_height);
+// printf("int output_width      = %d\n", output_width);
+
+
+// void *buf = NULL;
+// esp_dummy(buf);
+
+    token_t * acc_buf;
+    acc_buf           = (token_t *)esp_alloc(MAX_SIZE);
+    cfg_000[0].hw_buf = acc_buf;
+
+// set parameters
+    conv2d_cfg_000[0].n_channels         = input_depth;
+    conv2d_cfg_000[0].feature_map_height = input_height;
+    conv2d_cfg_000[0].feature_map_width  = input_width;
+    conv2d_cfg_000[0].n_filters          = filter_count;
+    conv2d_cfg_000[0].filter_dim         = filter_height; // should be the same as filter_width
+    if(padding == tflite::PaddingType::kSame){
+      conv2d_cfg_000[0].is_padded        = 1;
+    } else {
+      conv2d_cfg_000[0].is_padded        = 0;
+    }    
+    conv2d_cfg_000[0].stride             = stride_rows;   // should be the same as stride_cols
+    conv2d_cfg_000[0].do_relu            = 0;             // this function doesn't do relu (?)
+    conv2d_cfg_000[0].pool_type          = 0;             // this function doesn't do pooling (?)
+    conv2d_cfg_000[0].batch_size         = input_batches;
+
+// setup buffer
+
+    int32_t output_h;
+    int32_t output_pool_h;
+    int32_t pad_dim = 0;
+
+    if (padding == tflite::PaddingType::kSame) {
+        pad_dim = filter_height / 2;
+    }
+
+    int32_t pool_type = 0;  // this function doesn't do pooling (?)
+
+    output_h      = (input_height + 2 * pad_dim - ((filter_height - 1) + 1)) / stride_rows + 1;
+    output_pool_h = pool_type ? output_h / 2 : output_h;
+
+    // Input data and golden output (aligned to DMA_WIDTH makes your life easier)
+    int32_t in_len = round_up(
+        input_batches * round_up(input_depth * round_up(input_height * input_width, DMA_RATIO), DMA_RATIO),
+        DMA_RATIO);
+    int32_t weights_len = round_up(filter_count * input_depth * filter_height * filter_height, DMA_RATIO);
+    int32_t bias_len    = round_up(filter_count, DMA_RATIO);
+    int32_t out_len     = round_up(
+        input_batches * round_up(filter_count * round_up(output_pool_h * output_pool_h, DMA_RATIO), DMA_RATIO), DMA_RATIO);
+
+    // *in_size        = *in_len * sizeof(token_t);
+    // *weights_size   = *weights_len * sizeof(token_t);
+    // *bias_size      = *bias_len * sizeof(token_t);
+    // *out_size       = *out_len * sizeof(token_t);
+    // *weights_offset = *in_len;
+    // *bias_offset    = *in_len + *weights_len;
+    // *out_offset     = *in_len + *weights_len + *bias_len;
+    // *size           = *in_size + *weights_size + *bias_size + *out_size;
+
+int i;
+for (i = 0 ; i < in_len; i++){
+  acc_buf[i] = float2fx(input_data[i], FX_IL);
+}
+
+    esp_run(cfg_000, NACC);
+
+// retrieve buffer
+// T val;
+for(i = 0; i < out_len; i++){
+  output_data[i] = fx2float(acc_buf[i], FX_IL);
+}
+
+
+    esp_free(acc_buf);
+
+
+/*                
     const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                 stride_rows == 1 && stride_cols == 1);
 
-// [humu]: invoke the accelerator here
-
-                              
     if (is_1x1_kernel) {
       // For 1x1 kernel, the 2D convolution is reduced to matrix
       // multiplication.
@@ -140,6 +244,8 @@ class EigenTensorConvFunctor {
           Eigen::SpatialConvolution(input, filter, stride_cols, stride_rows,
                                     RuntimePadding2EigenPadding(padding));
     }
+*/
+
   }
 };
 

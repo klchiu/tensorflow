@@ -41,6 +41,7 @@ add_executable(minimal
 )
 target_link_libraries(minimal
   tensorflow-lite
+  # [humu]: include these static libraries for using ESP APIs
   # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libmonitors.a
   # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libesp.a
   # ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libutils.a
