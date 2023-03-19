@@ -17,6 +17,7 @@ limitations under the License.
 #define TENSORFLOW_TSL_FRAMEWORK_CONVOLUTION_EIGEN_SPATIAL_CONVOLUTIONS_INL_H_
 
 #include "tensorflow/tsl/framework/convolution/eigen_convolution_helpers.h"
+#include <iostream>
 
 // Note this header is used in both TF and TFLite.
 namespace Eigen {
@@ -1619,6 +1620,11 @@ SpatialConvolution(const Input& input, const Kernel& kernel,
 
   const int NumDims = internal::traits<Input>::NumDimensions;
 
+printf("[humu]: Inside SpatialConvolution\n");
+printf("[humu]: Inside SpatialConvolution, NumDims = %d\n", NumDims);
+printf("[humu]: Inside SpatialConvolution, isColMajor = %d\n", isColMajor);
+
+
   // Number of filters to apply. This is the same as the output depth of the
   // result
   const TensorIndex kernelFilters =
@@ -1721,7 +1727,13 @@ SpatialConvolution(const Input& input, const Kernel& kernel,
     kernel_dims[1] = kernelFilters;
   }
   if (padding_explicit) {
+    // printf("[humu]: Inside SpatialConvolution, padding_explicit = %d\n", padding_explicit);
+
+    //     // std::cout << input << std::endl;
+    //     std::cout << kernel << std::endl;
+
     return choose(
+        
         Cond<internal::traits<Input>::Layout == ColMajor>(),
         kernel.reshape(kernel_dims)
             .contract(input
@@ -1747,6 +1759,12 @@ SpatialConvolution(const Input& input, const Kernel& kernel,
             .contract(kernel.reshape(kernel_dims), contract_dims, output_kernel)
             .reshape(post_contract_dims));
   } else {
+    // printf("[humu]: Inside SpatialConvolution, padding_explicit = %d\n", padding_explicit);
+
+    //     // std::cout << input << std::endl;
+    //     std::cout << kernel_dims[0] << std::endl <<  std::endl;
+    //     std::cout << kernel_dims[1] << std::endl <<  std::endl;
+
     return choose(
         Cond<internal::traits<Input>::Layout == ColMajor>(),
         kernel.reshape(kernel_dims)

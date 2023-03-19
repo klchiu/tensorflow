@@ -39,9 +39,9 @@ struct esp_access {
 	uint8_t p2p_nsrcs;
 	char p2p_srcs[4][64];
 	enum accelerator_coherence coherence;
-        unsigned int footprint;
-        enum contig_alloc_policy alloc_policy;
-        unsigned int ddr_node;
+    unsigned int footprint;
+    enum contig_alloc_policy alloc_policy;
+    unsigned int ddr_node;
 	unsigned int in_place;
 	unsigned int reuse_factor;
 };

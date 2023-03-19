@@ -864,7 +864,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
                const TfLiteTensor* bias, TfLiteTensor* im2col,
                TfLiteTensor* hwcn_weights, TfLiteTensor* output) {
 
-printf("[humu]: conv.cc, EvalFloat\n");
+// printf("[humu]: conv.cc, EvalFloat\n");
 
   float output_activation_min, output_activation_max;
   CalculateActivationRange(params->activation, &output_activation_min,
@@ -936,11 +936,11 @@ printf("[humu]: conv.cc, EvalFloat\n");
       break;
     }
     case kMultithreadOptimized: {
-                  printf("[humu]: conv.cc, EvalFloat:kMultithreadOptimized \n");
+                  // printf("[humu]: conv.cc, EvalFloat:kMultithreadOptimized \n");
 
 #if defined(TFLITE_WITH_MULTITHREADED_EIGEN)
 
-    printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 1 \n");
+    // printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 1 \n");
 
       const float* filter_data;
       if (data->need_hwcn_weights) {
@@ -1169,7 +1169,7 @@ TfLiteStatus EvalImpl(TfLiteContext* context, TfLiteNode* node) {
   auto* params = reinterpret_cast<TfLiteConvParams*>(node->builtin_data);
   OpData* data = reinterpret_cast<OpData*>(node->user_data);
 
-printf("[humu]: conv.cc, EvalImpl\n");
+// printf("[humu]: conv.cc, EvalImpl\n");
 
   TfLiteTensor* output;
   TF_LITE_ENSURE_OK(context, GetOutputSafe(context, node, 0, &output));
@@ -1243,7 +1243,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteTensor* input;
   TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, 0, &input));
 
-  printf("[humu]: conv.cc, Eval\n");
+  // printf("[humu]: conv.cc, Eval\n");
 
 
   switch (input->type) {
