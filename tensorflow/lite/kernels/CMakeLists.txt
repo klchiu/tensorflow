@@ -111,19 +111,23 @@ endif()
 
 set(TEST_FRAMEWORK_OPTIONS "")
 if(TFLITE_ENABLE_XNNPACK)
+  message("[humu]: CMakeLists(lite/kernels) TFLITE_ENABLE_XNNPACK = ON")
   list(APPEND TEST_FRAMEWORK_SRC
     ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
     ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/xnnpack_plugin.cc)
 else()
+  message("[humu]: CMakeLists(lite/kernels) TFLITE_ENABLE_XNNPACK = OFF")
   list(APPEND TEST_FRAMEWORK_OPTIONS "-DTFLITE_WITHOUT_XNNPACK")
 endif()
 
 # [humu]
 if(TFLITE_ENABLE_ESP)
+  message("[humu]: CMakeLists(lite/kernels) TFLITE_ENABLE_ESP = ON")
   list(APPEND TEST_FRAMEWORK_SRC
     ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
     ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/esp_plugin.cc)
 else()
+  message("[humu]: CMakeLists(lite/kernels) TFLITE_ENABLE_ESP = OFF")
   list(APPEND TEST_FRAMEWORK_OPTIONS "-DTFLITE_WITHOUT_ESP")
 endif()
 
@@ -171,7 +175,10 @@ macro(add_kernel_test TEST_SRC TEST_LIB)
   )
   set_tests_properties(${TEST_NAME} PROPERTIES LABELS "plain")
 
-  if(_TFLITE_ENABLE_NNAPI OR TFLITE_ENABLE_EXTERNAL_DELEGATE OR TFLITE_ENABLE_XNNPACK)
+
+  message("\n\n[humu]: kernels/CMakeLists: debug 0\n\n")
+
+  if(_TFLITE_ENABLE_NNAPI OR TFLITE_ENABLE_EXTERNAL_DELEGATE OR TFLITE_ENABLE_XNNPACK OR TFLITE_ENABLE_ESP)
     set(DELEGATE_TEST "${TEST_NAME}_delegate")
     add_test(
       NAME ${DELEGATE_TEST}

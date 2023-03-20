@@ -1,6 +1,6 @@
 // This file implements the C API Delegate Plugin for the ESP Delegate.
 
-#include "tensorflow/lite/core/experimental/acceleration/configuration/c/Esp_plugin.h"
+#include "tensorflow/lite/core/experimental/acceleration/configuration/c/esp_plugin.h"
 
 #include <memory>
 
@@ -14,10 +14,10 @@ static TfLiteDelegate* CreateDelegate(const void* settings) {
   const ::tflite::TFLiteSettings* tflite_settings =
       static_cast<const ::tflite::TFLiteSettings*>(settings);
   auto options(TfLiteEspDelegateOptionsDefault());
-  const auto* esp_settings = tflite_settings->esp_settings();
-  if (esp_settings) {
-    options.num_threads = esp_settings->num_threads();
-  }
+  // const auto* esp_settings = tflite_settings->esp_settings();
+  // if (esp_settings) {
+  //   options.num_threads = esp_settings->num_threads();
+  // }
   return TfLiteEspDelegateCreate(&options);
 }
 

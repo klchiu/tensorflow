@@ -18,15 +18,15 @@ typedef struct {
   bool error_during_prepare;
   // Report error during invoke.
   bool error_during_invoke;
-} EspDelegateOptions;
+} TfLiteEspDelegateOptions;
 
 // Returns a structure with the default delegate options.
-EspDelegateOptions TfLiteEspDelegateOptionsDefault();
+TfLiteEspDelegateOptions TfLiteEspDelegateOptionsDefault();
 
 // Creates a new delegate instance that needs to be destroyed with
 // `TfLiteEspDelegateDelete` when delegate is no longer used by TFLite.
 // When `options` is set to `nullptr`, the above default values are used:
-TfLiteDelegate* TfLiteEspDelegateCreate(const EspDelegateOptions* options);
+TfLiteDelegate* TFL_CAPI_EXPORT TfLiteEspDelegateCreate(const TfLiteEspDelegateOptions* options);
 
 // Destroys a delegate created with `TfLiteEspDelegateCreate` call.
 void TfLiteEspDelegateDelete(TfLiteDelegate* delegate);
@@ -38,7 +38,7 @@ void TfLiteEspDelegateDelete(TfLiteDelegate* delegate);
 // A convenient wrapper that returns C++ std::unique_ptr for automatic memory
 // management.
 inline std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>
-TfLiteEspDelegateCreateUnique(const EspDelegateOptions* options) {
+TfLiteEspDelegateCreateUnique(const TfLiteEspDelegateOptions* options) {
   return std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>(
       TfLiteEspDelegateCreate(options), TfLiteEspDelegateDelete);
 }

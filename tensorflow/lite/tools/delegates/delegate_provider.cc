@@ -23,16 +23,23 @@ namespace tflite {
 namespace tools {
 
 TfLiteDelegatePtr CreateNullDelegate() {
+  
+  printf("[humu]: delegate_provider.cc : CreateNullDelegate\n");
+
   return TfLiteDelegatePtr(nullptr, [](TfLiteOpaqueDelegate*) {});
 }
 
 void ProvidedDelegateList::AddAllDelegateParams() const {
+    printf("[humu]: delegate_provider.cc : ProvidedDelegateList::AddAllDelegateParams\n");
+
   for (const auto& provider : providers_) {
     params_->Merge(provider->DefaultParams());
   }
 }
 
 void ProvidedDelegateList::AppendCmdlineFlags(std::vector<Flag>& flags) const {
+      printf("[humu]: delegate_provider.cc : ProvidedDelegateList::AppendCmdlineFlags\n");
+
   for (const auto& provider : providers_) {
     auto delegate_flags = provider->CreateFlags(params_);
     flags.insert(flags.end(), delegate_flags.begin(), delegate_flags.end());
@@ -41,6 +48,8 @@ void ProvidedDelegateList::AppendCmdlineFlags(std::vector<Flag>& flags) const {
 
 void ProvidedDelegateList::RemoveCmdlineFlag(std::vector<Flag>& flags,
                                              const std::string& name) const {
+printf("[humu]: delegate_provider.cc : ProvidedDelegateList::RemoveCmdlineFlag\n");
+
   decltype(flags.begin()) it;
   for (it = flags.begin(); it < flags.end();) {
     if (it->GetFlagName() == name) {
@@ -53,6 +62,10 @@ void ProvidedDelegateList::RemoveCmdlineFlag(std::vector<Flag>& flags,
 
 std::vector<ProvidedDelegateList::ProvidedDelegate>
 ProvidedDelegateList::CreateAllRankedDelegates(const ToolParams& params) const {
+
+printf("[humu]: delegate_provider.cc : ProvidedDelegateList::CreateAllRankedDelegates\n");
+
+
   std::vector<ProvidedDelegateList::ProvidedDelegate> delegates;
   for (const auto& provider : providers_) {
     auto ptr_rank = provider->CreateRankedTfLiteDelegate(params);

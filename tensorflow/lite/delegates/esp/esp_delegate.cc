@@ -41,12 +41,14 @@ namespace esp_test {
 // ------------------------------------------------------------------
 class EspDelegateKernel : public SimpleDelegateKernelInterface {
  public:
-  explicit EspDelegateKernel(const EspDelegateOptions& options)
+  explicit EspDelegateKernel(const TfLiteEspDelegateOptions& options)
       : options_(options) {}
 
   TfLiteStatus Init(TfLiteContext* context,
                     const TfLiteDelegateParams* params) override {
     
+    printf("[humu]: ESP Init()\n");
+
      // Save index to all nodes which are part of this delegate.
     inputs_.resize(params->nodes_to_replace->size);
     outputs_.resize(params->nodes_to_replace->size);
@@ -80,6 +82,7 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
 
   TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) override {
     // return !options_.error_during_prepare ? kTfLiteOk : kTfLiteError;
+    printf("[humu]: ESP Prepare()\n");
     return kTfLiteOk;
   }
 
@@ -93,6 +96,7 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
     // outputs for node
     // ''i''. Note, that it is intentional we have simple implementation as this
     // is for demonstration.
+        printf("[humu]: ESP Eval()\n");
 
     for (int i = 0; i < inputs_.size(); ++i) {
       // Get the node input tensors.
@@ -119,6 +123,8 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
                              const TfLiteTensor* input_tensor_1,
                              const TfLiteTensor* input_tensor_2,
                              TfLiteTensor* output_tensor) {
+printf("[humu]: ESP ComputeResult\n");
+
     if (NumElements(input_tensor_1) != NumElements(input_tensor_2) ||
         NumElements(input_tensor_1) != NumElements(output_tensor)) {
       return kTfLiteDelegateError;
@@ -165,7 +171,7 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
 
 
 
-  const EspDelegateOptions options_;
+  const TfLiteEspDelegateOptions options_;
 };
 
 // ------------------------------------------------------------------
@@ -175,7 +181,7 @@ class EspDelegateKernel : public SimpleDelegateKernelInterface {
 // ------------------------------------------------------------------
 class EspDelegate : public SimpleDelegateInterface {
  public:
-  explicit EspDelegate(const EspDelegateOptions& options)
+  explicit EspDelegate(const TfLiteEspDelegateOptions& options)
       : options_(options) {}
   bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration,
                                  const TfLiteNode* node,
@@ -216,14 +222,15 @@ class EspDelegate : public SimpleDelegateInterface {
   }
 
  private:
-  const EspDelegateOptions options_;
+  const TfLiteEspDelegateOptions options_;
 };
 
-}  // namespace esp_test
+}  // namespace esp_testf
 }  // namespace tflite
 
-EspDelegateOptions TfLiteEspDelegateOptionsDefault() {
-  EspDelegateOptions options = {0};
+
+TfLiteEspDelegateOptions TfLiteEspDelegateOptionsDefault() {
+  TfLiteEspDelegateOptions options = {0};
   // Just assign an invalid builtin code so that this esp test delegate will
   // not support any node by default.
   options.allowed_builtin_code = -1;
@@ -233,7 +240,7 @@ EspDelegateOptions TfLiteEspDelegateOptionsDefault() {
 // Creates a new delegate instance that need to be destroyed with
 // `TfLiteEspDelegateDelete` when delegate is no longer used by TFLite.
 // When `options` is set to `nullptr`, the above default values are used:
-TfLiteDelegate* TfLiteEspDelegateCreate(const EspDelegateOptions* options) {
+TfLiteDelegate* TfLiteEspDelegateCreate(const TfLiteEspDelegateOptions* options) {
   std::unique_ptr<tflite::esp_test::EspDelegate> esp(
       new tflite::esp_test::EspDelegate(
           options ? *options : TfLiteEspDelegateOptionsDefault()));

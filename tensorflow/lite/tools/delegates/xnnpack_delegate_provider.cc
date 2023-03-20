@@ -41,6 +41,10 @@ REGISTER_DELEGATE_PROVIDER(XnnpackDelegateProvider);
 
 std::vector<Flag> XnnpackDelegateProvider::CreateFlags(
     ToolParams* params) const {
+
+  printf("[humu]: XnnpackDelegateProvider::CreateFlags\n");
+
+
   std::vector<Flag> flags = {CreateFlag<bool>(
       "use_xnnpack", params,
       "explicitly apply the XNNPACK delegate. Note the XNNPACK delegate could "
@@ -52,11 +56,17 @@ std::vector<Flag> XnnpackDelegateProvider::CreateFlags(
 
 void XnnpackDelegateProvider::LogParams(const ToolParams& params,
                                         bool verbose) const {
+
+  printf("[humu]: XnnpackDelegateProvider::LogParams\n");
+
   LOG_TOOL_PARAM(params, bool, "use_xnnpack", "Use xnnpack", verbose);
 }
 
 TfLiteDelegatePtr XnnpackDelegateProvider::CreateTfLiteDelegate(
     const ToolParams& params) const {
+  
+  printf("[humu]: XnnpackDelegateProvider::CreateTfLiteDelegate\n");
+
   if (params.Get<bool>("use_xnnpack")) {
     return evaluation::CreateXNNPACKDelegate(
         params.Get<int32_t>("num_threads"));
@@ -67,6 +77,9 @@ TfLiteDelegatePtr XnnpackDelegateProvider::CreateTfLiteDelegate(
 std::pair<TfLiteDelegatePtr, int>
 XnnpackDelegateProvider::CreateRankedTfLiteDelegate(
     const ToolParams& params) const {
+  
+  printf("[humu]: XnnpackDelegateProvider::CreateRankedTfLiteDelegate\n");
+
   auto ptr = CreateTfLiteDelegate(params);
   return std::make_pair(std::move(ptr),
                         params.GetPosition<bool>("use_xnnpack"));

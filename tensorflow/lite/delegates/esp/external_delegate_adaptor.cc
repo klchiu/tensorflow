@@ -13,9 +13,9 @@ namespace tools {
 TfLiteDelegate* CreateEspDelegateFromOptions(
     const char* const* options_keys, const char* const* options_values,
     size_t num_options) {
-  EspDelegateOptions options = TfLiteEspDelegateOptionsDefault();
+  TfLiteEspDelegateOptions options = TfLiteEspDelegateOptionsDefault();
 
-  // Parse key-values options to EspDelegateOptions by mimicking them as
+  // Parse key-values options to TfLiteEspDelegateOptions by mimicking them as
   // command-line flags.
   std::vector<const char*> argv;
   argv.reserve(num_options + 1);

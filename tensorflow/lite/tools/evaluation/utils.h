@@ -53,6 +53,11 @@ limitations under the License.
 #include "tensorflow/lite/delegates/xnnpack/xnnpack_delegate.h"
 #endif  // !defined(TFLITE_WITHOUT_XNNPACK)
 
+// [humu]: need to check why this if doesn't work
+// #if TFLITE_ENABLE_ESP
+#include "tensorflow/lite/delegates/esp/esp_delegate.h"
+// #endif
+
 #include "tensorflow/lite/core/shims/c/common.h"
 
 namespace tflite {
@@ -106,6 +111,14 @@ TfLiteDelegatePtr CreateXNNPACKDelegate(
     const TfLiteXNNPackDelegateOptions* options);
 #endif  // !defined(TFLITE_WITHOUT_XNNPACK)
 TfLiteDelegatePtr CreateXNNPACKDelegate(int num_threads);
+
+
+TfLiteDelegatePtr CreateEspDelegate();
+#ifndef TFLITE_WITHOUT_ESP
+TfLiteDelegatePtr CreateEspDelegate(
+    const TfLiteEspDelegateOptions* options);
+#endif  // TFLITE_WITHOUT_ESP
+
 
 TfLiteDelegatePtr CreateCoreMlDelegate();
 }  // namespace evaluation

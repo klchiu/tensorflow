@@ -3,6 +3,8 @@
 
 #include "tensorflow/lite/delegates/esp/esp_delegate.h"
 #include "tensorflow/lite/tools/delegates/delegate_provider.h"
+#include "tensorflow/lite/tools/evaluation/utils.h"
+
 
 namespace tflite {
 namespace tools {
@@ -27,6 +29,9 @@ class EspDelegateProvider : public DelegateProvider {
 REGISTER_DELEGATE_PROVIDER(EspDelegateProvider);
 
 std::vector<Flag> EspDelegateProvider::CreateFlags(ToolParams* params) const {
+
+  printf("[humu]: EspDelegateProvider::CreateFlags\n");
+
   std::vector<Flag> flags = {CreateFlag<bool>("use_esp_delegate", params,
                                               "use the esp delegate.")};
   return flags;
@@ -34,12 +39,16 @@ std::vector<Flag> EspDelegateProvider::CreateFlags(ToolParams* params) const {
 
 void EspDelegateProvider::LogParams(const ToolParams& params,
                                       bool verbose) const {
+  printf("[humu]: EspDelegateProvider::LogParams\n");
+
   LOG_TOOL_PARAM(params, bool, "use_esp_delegate", "Use esp test delegate",
                  verbose);
 }
 
 TfLiteDelegatePtr EspDelegateProvider::CreateTfLiteDelegate(
     const ToolParams& params) const {
+  printf("[humu]: EspDelegateProvider::CreateTfLiteDelegate\n");
+
   if (params.Get<bool>("use_esp_delegate")) {
     auto default_options = TfLiteEspDelegateOptionsDefault();
     return TfLiteEspDelegateCreateUnique(&default_options);
@@ -50,6 +59,8 @@ TfLiteDelegatePtr EspDelegateProvider::CreateTfLiteDelegate(
 std::pair<TfLiteDelegatePtr, int>
 EspDelegateProvider::CreateRankedTfLiteDelegate(
     const ToolParams& params) const {
+  printf("[humu]: EspDelegateProvider::CreateRankedTfLiteDelegate\n");
+
   auto ptr = CreateTfLiteDelegate(params);
   return std::make_pair(std::move(ptr),
                         params.GetPosition<bool>("use_esp_delegate"));

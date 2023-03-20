@@ -1030,13 +1030,20 @@ printf("[humu]: XNNPACK Invoke: debug 2\n");
 printf("[humu]: XNNPACK Invoke: debug 3\n");
 
     if (status != xnn_status_success) {
+      printf("[humu]: XNNPACK Invoke: debug 3-1\n");
+
       TF_LITE_KERNEL_LOG(context, "failed to invoke XNNPACK runtime");
       return kTfLiteError;
     }
 
     if (context->profiler) {
+      printf("[humu]: XNNPACK Invoke: debug 3-2\n");
+
       if (AddEventsToProfiler(reinterpret_cast<Profiler*>(context->profiler),
                               runtime_.get()) != kTfLiteOk) {
+        
+        printf("[humu]: XNNPACK Invoke: debug 3-3\n");
+
         TF_LITE_KERNEL_LOG(context,
                            "failed to get XNNPACK profile information.");
       }

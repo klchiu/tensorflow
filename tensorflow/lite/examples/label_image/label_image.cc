@@ -130,6 +130,18 @@ class DelegateProviders {
         params_.Set<int32_t>("num_threads", s.number_of_threads);
       }
     }
+
+    // Parse settings related to ESP delegate.
+    if (s.esp_delegate) {
+      if (!params_.HasParam("use_esp")) {
+        LOG(WARN) << "ESP delegate execution provider isn't linked or "
+                     "ESP delegate isn't supported on the platform!";
+      } else {
+        params_.Set<bool>("use_esp", true);
+        params_.Set<int32_t>("num_threads", s.number_of_threads);
+      }
+    }
+
   }
 
   // Create a list of TfLite delegates based on what have been initialized (i.e.
@@ -421,6 +433,7 @@ void display_usage(const DelegateProviders& delegate_providers) {
       << "\t--verbose, -v: [0|1] print more information\n"
       << "\t--warmup_runs, -w: number of warmup runs\n"
       << "\t--xnnpack_delegate, -x [0:1]: xnnpack delegate\n"
+      << "\t--esp_delegate, -z [0:1]: esp delegate\n"
       << "\t--help, -h: Print this help message\n";
 }
 
@@ -455,6 +468,7 @@ int Main(int argc, char** argv) {
         {"gl_backend", required_argument, nullptr, 'g'},
         {"hexagon_delegate", required_argument, nullptr, 'j'},
         {"xnnpack_delegate", required_argument, nullptr, 'x'},
+        {"esp_delegate", required_argument, nullptr, 'z'},
         {"help", no_argument, nullptr, 'h'},
         {nullptr, 0, nullptr, 0}};
 
@@ -527,6 +541,10 @@ int Main(int argc, char** argv) {
         break;
       case 'x':
         s.xnnpack_delegate =
+            strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
+        break;
+      case 'z':
+        s.esp_delegate =
             strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
         break;
       case 'h':

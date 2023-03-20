@@ -27,7 +27,7 @@ extern "C" {
 
 // C API for the ESP delegate plugin.
 // Returns a pointer to a statically allocated table of function pointers.
-const TfLiteDelegatePlugin* TfLiteEsp DelegatePluginCApi();
+const TfLiteDelegatePlugin* TfLiteEspDelegatePluginCApi();
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -47,10 +47,13 @@ endif()  # TFLITE_ENABLE_XNNPACK
 # [humu]: need to check why adding this create TfLiteXnnpackDelegatePluginCApi 
 #         issue, when enabling XNNPACK
 # if(TFLITE_ENABLE_ESP)
+#   message("[humu]: CMakeLists(label_image) TFLITE_ENABLE_ESP = ON")
 #   list(APPEND TFLITE_LABEL_IMAGE_SRCS
 #     ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
+#     ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/esp_plugin.cc
 #   )
 # else()
+#   message("[humu]: CMakeLists(label_image) TFLITE_ENABLE_ESP = OFF")
 #   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
 # endif()  # TFLITE_ENABLE_ESP
 

@@ -23,11 +23,22 @@ set(TENSORFLOW_SOURCE_DIR "" CACHE PATH
   "Directory that contains the TensorFlow project"
 )
 if(NOT TENSORFLOW_SOURCE_DIR)
+  # message("[humu]: examples/minimal/CMakeLists: debug 0")
   get_filename_component(TENSORFLOW_SOURCE_DIR
     "${CMAKE_CURRENT_LIST_DIR}/../../../../"
     ABSOLUTE
   )
 endif()
+
+if(TFLITE_ENABLE_ESP)
+  message("[humu]: CMakeLists(minimal) TFLITE_ENABLE_ESP = ON")
+  list(APPEND TFLITE_MINIMAL_SRCS
+    ${TFLITE_SOURCE_DIR}/tools/delegates/esp_delegate_provider.cc
+  )
+else()
+  message("[humu]: CMakeLists(minimal) TFLITE_ENABLE_ESP = OFF")
+  set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
+endif()  # TFLITE_ENABLE_ESP
 
 add_subdirectory(
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"

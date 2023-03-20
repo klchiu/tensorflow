@@ -248,6 +248,36 @@ TfLiteDelegatePtr CreateXNNPACKDelegate(int num_threads) {
 }
 #endif
 
+
+// [humu]: need to check why adding this create TfLiteXnnpackDelegatePluginCApi 
+//         issue, when enabling XNNPACK
+/*
+#ifdef TFLITE_WITHOUT_ESP
+TfLiteDelegatePtr CreateEspDelegate() {
+  return tools::CreateNullDelegate();
+}
+#else  // !defined(TFLITE_WITHOUT_ESP)
+TfLiteDelegatePtr CreateEspDelegate() {
+  TfLiteEspDelegateOptions esp_options = TfLiteEspDelegateOptionsDefault();
+  return CreateEspDelegate(&esp_options);
+}
+
+TfLiteDelegatePtr CreateEspDelegate(
+    const TfLiteEspDelegateOptions* esp_options) {
+    
+  TfLiteDelegate* delegate = TfLiteEspDelegateCreate(esp_options);
+  if (!delegate) {
+    return tools::CreateNullDelegate();
+  }
+  return TfLiteDelegatePtr(delegate, [](TfLiteDelegate* delegate) {
+    TfLiteEspDelegateDelete(delegate);
+  });
+}
+#endif
+*/
+
+
+
 TfLiteDelegatePtr CreateCoreMlDelegate() {
 #ifdef REAL_IPHONE_DEVICE
   TfLiteCoreMlDelegateOptions coreml_options = {
