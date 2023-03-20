@@ -649,6 +649,9 @@ class Subgraph {
   static Subgraph* Create(TfLiteContext* context,
                           const TfLiteDelegateParams* params,
                           Delegate& delegate) {
+    
+    printf("[humu]: XNNPACK Create  0\n");
+
     // Convert subgraph inputs and outputs to hash sets for faster lookup.
     const std::unordered_set<int> inputs(
         &params->input_tensors->data[0],
@@ -713,6 +716,8 @@ class Subgraph {
         // was pre-unpacked in DelegatePrepare.
         continue;
       }
+    
+      printf("[humu]: XNNPACK Create  1, builtin_code = %d\n", registration->builtin_code);
 
       switch (registration->builtin_code) {
         case kTfLiteBuiltinMean:
@@ -2924,7 +2929,7 @@ printf("[humu]: XNNPACK Invoke: debug 4\n");
       const std::unordered_set<int>& quasi_static_tensors,
       const std::vector<uint32_t>& xnnpack_tensors) {
 
-  printf("[humu]: XNNPACK VisiVisitConv2DNodeNode  0\n");
+  printf("[humu]: XNNPACK VisitConv2DNode  0\n");
 
     TF_LITE_ENSURE_STATUS(
         CheckConvolutionParams(logging_context, conv_params, node_index));
@@ -5923,6 +5928,18 @@ TfLiteIntArray* Delegate::PrepareOpsToDelegate(TfLiteContext* context) {
 }
 
 void* SubgraphInit(TfLiteContext* context, const char* buffer, size_t length) {
+  printf("[humu]: XNNPACK SubgraphInit  0\n");
+
+  //const int node_index = params->nodes_to_replace->data[i];
+
+  // TfLiteNode* node = nullptr;
+  // TfLiteRegistration* registration = nullptr;
+  // if (context->GetNodeAndRegistration(context, node_index, &node,
+  //                                         &registration) != kTfLiteOk) {
+  //   return nullptr;
+  // }
+  // printf("[humu]: XNNPACK SubgraphInit  1, builtin_code = %d\n", registration->builtin_code);
+
   const TfLiteDelegateParams* params =
       reinterpret_cast<const TfLiteDelegateParams*>(buffer);
 
@@ -5932,6 +5949,8 @@ void* SubgraphInit(TfLiteContext* context, const char* buffer, size_t length) {
 }
 
 TfLiteStatus SubgraphPrepare(TfLiteContext* context, TfLiteNode* node) {
+  printf("[humu]: XNNPACK SubgraphPrepare  0\n");
+
   if (node->user_data == nullptr) {
     return kTfLiteError;
   }
@@ -5940,6 +5959,8 @@ TfLiteStatus SubgraphPrepare(TfLiteContext* context, TfLiteNode* node) {
 }
 
 TfLiteStatus SubgraphInvoke(TfLiteContext* context, TfLiteNode* node) {
+  printf("[humu]: XNNPACK SubgraphInvoke  0\n");
+
   if (node->user_data == nullptr) {
     return kTfLiteError;
   }
@@ -5948,6 +5969,8 @@ TfLiteStatus SubgraphInvoke(TfLiteContext* context, TfLiteNode* node) {
 }
 
 void SubgraphFree(TfLiteContext* context, void* buffer) {
+  printf("[humu]: XNNPACK SubgraphFree  0\n");
+
   if (buffer != nullptr) {
     delete static_cast<Subgraph*>(buffer);
   }
@@ -6037,6 +6060,8 @@ void TfLiteXNNPackDelegateWeightsCacheDelete(
 }
 
 TfLiteXNNPackDelegateOptions TfLiteXNNPackDelegateOptionsDefault() {
+  printf("[humu]: XNNPACK TfLiteXNNPackDelegateOptionsDefault  0\n");
+
   TfLiteXNNPackDelegateOptions options = {0};
 
   // Quantized inference is enabled by default on Web platform
@@ -6059,11 +6084,16 @@ TfLiteXNNPackDelegateOptions TfLiteXNNPackDelegateOptionsDefault() {
 
 TfLiteDelegate* TfLiteXNNPackDelegateCreate(
     const TfLiteXNNPackDelegateOptions* options) {
+  printf("[humu]: XNNPACK TfLiteXNNPackDelegateCreate  0\n");
+
   return TfLiteXNNPackDelegateCreateWithThreadpool(options, nullptr);
 }
 
 TfLiteDelegate* TfLiteXNNPackDelegateCreateWithThreadpool(
     const TfLiteXNNPackDelegateOptions* options, TfLiteContext* context) {
+  printf("[humu]: XNNPACK TfLiteXNNPackDelegateCreateWithThreadpool  0\n");
+
+
   xnn_status status = xnn_initialize(/*allocator=*/nullptr);
   if (status != xnn_status_success) {
     return nullptr;
@@ -6080,6 +6110,8 @@ TfLiteDelegate* TfLiteXNNPackDelegateCreateWithThreadpool(
 }
 
 void* TfLiteXNNPackDelegateGetThreadPool(TfLiteDelegate* delegate) {
+  printf("[humu]: XNNPACK TfLiteXNNPackDelegateGetThreadPool  0\n");
+
   if (delegate == nullptr) {
     return nullptr;
   }
@@ -6089,6 +6121,8 @@ void* TfLiteXNNPackDelegateGetThreadPool(TfLiteDelegate* delegate) {
 }
 
 void TfLiteXNNPackDelegateDelete(TfLiteDelegate* delegate) {
+  printf("[humu]: XNNPACK TfLiteXNNPackDelegateDelete  0\n");
+
   if (delegate != nullptr) {
     ::tflite::xnnpack::Delegate* data =
         static_cast<::tflite::xnnpack::Delegate*>(delegate->data_);
