@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 #include "tensorflow/lite/tflite_with_xnnpack_optional.h"
+#include "tensorflow/lite/delegates/xnnpack/xnnpack_delegate.h"
 
 #include <memory>
 
@@ -36,7 +37,7 @@ TfLiteDelegatePtr MaybeCreateXNNPACKDelegate(
     opts.flags |= TFLITE_XNNPACK_DELEGATE_FLAG_QU8;
   }
   return TfLiteDelegatePtr(
-      TfLiteXNNPackDelegateCreateWithThreadpool(&opts, context),
+      TfLiteXNNPackDelegateCreate(&opts),
       TfLiteXNNPackDelegateDelete);
 }
 #else

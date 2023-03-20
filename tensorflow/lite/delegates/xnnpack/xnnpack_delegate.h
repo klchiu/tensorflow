@@ -1,26 +1,131 @@
-/* Copyright 2020 The TensorFlow Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-==============================================================================*/
-
 #ifndef TENSORFLOW_LITE_DELEGATES_XNNPACK_XNNPACK_DELEGATE_H_
 #define TENSORFLOW_LITE_DELEGATES_XNNPACK_XNNPACK_DELEGATE_H_
 
-#include "tensorflow/lite/core/c/common.h"
+#include <memory>
+
+#include "tensorflow/lite/c/common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
+
+
+
+namespace tflite {
+
+using TfLiteDelegateUniquePtr =
+    std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>;
+
+// Users should inherit from this class and implement the interface below.
+// Each instance represents a single part of the graph (subgraph).
+class SimpleDelegateKernelInterface {
+ public:
+  virtual ~SimpleDelegateKernelInterface() {}
+
+  // Initializes a delegated subgraph.
+  // The nodes in the subgraph are inside TfLiteDelegateParams->nodes_to_replace
+  virtual TfLiteStatus Init(TfLiteContext* context,
+                            const TfLiteDelegateParams* params) = 0;
+
+  // Will be called by the framework. Should handle any needed preparation
+  // for the subgraph e.g. allocating buffers, compiling model.
+  // Returns status, and signalling any errors.
+  virtual TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) = 0;
+
+  // Actual subgraph inference should happen on this call.
+  // Returns status, and signalling any errors.
+  // NOTE: Tensor data pointers (tensor->data) can change every inference, so
+  // the implementation of this method needs to take that into account.
+  virtual TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) = 0;
+};
+
+// Pure Interface that clients should implement.
+// The Interface represents a delegate's capabilities and provides a factory
+// for SimpleDelegateKernelInterface.
+//
+// Clients should implement the following methods:
+// - IsNodeSupportedByDelegate
+// - Initialize
+// - Name
+// - CreateDelegateKernelInterface
+// - DelegateOptions
+class SimpleDelegateInterface {
+ public:
+  // Properties of a delegate.  These are used by TfLiteDelegateFactory to
+  // help determine how to partition the graph, i.e. which nodes each delegate
+  // will get applied to.
+  struct Options {
+    // Maximum number of delegated subgraph, values <=0 means unlimited.
+    int max_delegated_partitions = 0;
+
+    // The minimum number of nodes allowed in a delegated graph, values <=0
+    // means unlimited.
+    int min_nodes_per_partition = 0;
+  };
+
+  virtual ~SimpleDelegateInterface() {}
+
+  // Returns true if 'node' is supported by the delegate. False otherwise.
+  virtual bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration,
+                                         const TfLiteNode* node,
+                                         TfLiteContext* context) const = 0;
+
+  // Initialize the delegate before finding and replacing TfLite nodes with
+  // delegate kernels, for example, retrieving some TFLite settings from
+  // 'context'.
+  virtual TfLiteStatus Initialize(TfLiteContext* context) = 0;
+
+  // Returns a name that identifies the delegate.
+  // This name is used for debugging/logging/profiling.
+  virtual const char* Name() const = 0;
+
+  // Returns instance of an object that implements the interface
+  // SimpleDelegateKernelInterface.
+  // An instance of SimpleDelegateKernelInterface represents one subgraph to
+  // be delegated.
+  // Caller takes ownership of the returned object.
+  virtual std::unique_ptr<SimpleDelegateKernelInterface>
+  CreateDelegateKernelInterface() = 0;
+
+  // Returns SimpleDelegateInterface::Options which has delegate properties
+  // relevant for graph partitioning.
+  virtual SimpleDelegateInterface::Options DelegateOptions() const = 0;
+};
+
+// Factory class that provides static methods to deal with SimpleDelegate
+// creation and deletion.
+class TfLiteDelegateFactory {
+ public:
+  // Creates TfLiteDelegate from the provided SimpleDelegateInterface.
+  // The returned TfLiteDelegate should be deleted using DeleteSimpleDelegate.
+  // A simple usage of the flags bit mask:
+  // CreateSimpleDelegate(..., kTfLiteDelegateFlagsAllowDynamicTensors |
+  // kTfLiteDelegateFlagsRequirePropagatedShapes)
+  static TfLiteDelegate* CreateSimpleDelegate(
+      std::unique_ptr<SimpleDelegateInterface> simple_delegate,
+      int64_t flags = kTfLiteDelegateFlagsNone);
+
+  // Deletes 'delegate' the passed pointer must be the one returned
+  // from CreateSimpleDelegate.
+  // This function will destruct the SimpleDelegate object too.
+  static void DeleteSimpleDelegate(TfLiteDelegate* delegate);
+
+  // A convenient function wrapping the above two functions and returning a
+  // std::unique_ptr type for auto memory management.
+  inline static TfLiteDelegateUniquePtr Create(
+      std::unique_ptr<SimpleDelegateInterface> simple_delegate) {
+    return TfLiteDelegateUniquePtr(
+        CreateSimpleDelegate(std::move(simple_delegate)), DeleteSimpleDelegate);
+  }
+};
+
+}  // namespace tflite
+
+
+
+
+
+
 
 // Enable XNNPACK acceleration for signed quantized 8-bit inference.
 // This includes operators with channel-wise quantized weights.
@@ -30,7 +135,7 @@ extern "C" {
 // Force FP16 inference for FP32 operators.
 #define TFLITE_XNNPACK_DELEGATE_FLAG_FORCE_FP16 0x00000004
 
-struct TfLiteXNNPackDelegateWeightsCache;
+
 
 typedef struct {
   // Number of threads to use in the thread pool.
@@ -41,75 +146,37 @@ typedef struct {
   // - TFLITE_XNNPACK_DELEGATE_FLAG_QU8
   // - TFLITE_XNNPACK_DELEGATE_FLAG_FORCE_FP16
   uint32_t flags;
-  // Cache for packed weights, can be shared between multiple instances of
-  // delegates.
-  struct TfLiteXNNPackDelegateWeightsCache* weights_cache;
-  // Whether READ_VARIABLE, ASSIGN_VARIABLE, and VARIABLE_HANDLE operations
-  // should be handled by XNNPACK.
-  bool handle_variable_ops;
+  // Allowed ops to delegate.
+  int allowed_builtin_code;
+  // Report error during init.
+  bool error_during_init;
+  // Report error during prepare.
+  bool error_during_prepare;
+  // Report error during invoke.
+  bool error_during_invoke;
 } TfLiteXNNPackDelegateOptions;
 
-// Returns a structure with the default XNNPack delegate options.
-TFL_CAPI_EXPORT TfLiteXNNPackDelegateOptions
-TfLiteXNNPackDelegateOptionsDefault();
+// Returns a structure with the default delegate options.
+TfLiteXNNPackDelegateOptions TfLiteXNNPackDelegateOptionsDefault();
 
-// Creates a new delegate instance that need to be destroyed with
+// Creates a new delegate instance that needs to be destroyed with
 // `TfLiteXNNPackDelegateDelete` when delegate is no longer used by TFLite.
-// When `options` is set to `nullptr`, default values are used (see
-// implementation of TfLiteXNNPackDelegateOptionsDefault in the .cc file for
-// details).
-TFL_CAPI_EXPORT TfLiteDelegate* TfLiteXNNPackDelegateCreate(
-    const TfLiteXNNPackDelegateOptions* options);
-
-// Performs the same task as TfLiteXNNPackDelegateCreate, with one exception.
-// If the context passed contains a non-null xnnpack_threadpool field,
-// we will use it as the threadpool for the delegate created.
-TfLiteDelegate* TfLiteXNNPackDelegateCreateWithThreadpool(
-    const TfLiteXNNPackDelegateOptions* options, TfLiteContext* context);
-
-// Returns the pthreadpool_t object used for parallelization in XNNPACK.
-// Can return NULL if the XNNPack delegate is single-threaded.
-//
-// WARNING: This API is experimental and subject to change.
-TFL_CAPI_EXPORT void* TfLiteXNNPackDelegateGetThreadPool(
-    TfLiteDelegate* delegate);
+// When `options` is set to `nullptr`, the above default values are used:
+TfLiteDelegate*  TfLiteXNNPackDelegateCreate(const TfLiteXNNPackDelegateOptions* options);
 
 // Destroys a delegate created with `TfLiteXNNPackDelegateCreate` call.
-TFL_CAPI_EXPORT void TfLiteXNNPackDelegateDelete(TfLiteDelegate* delegate);
-
-// Creates a new weights cache that can be shared with multiple delegate
-// instances. Prefer TfLiteXNNPackDelegateWeightsCacheCreateWithSize which can
-// reduce memory bandwidth.
-TFL_CAPI_EXPORT struct TfLiteXNNPackDelegateWeightsCache*
-TfLiteXNNPackDelegateWeightsCacheCreate();
-// Creates a new weights cache with a specified initial size that can be shared
-// with multiple delegate instances. The weights cache can hold up to size bytes
-// without growing.
-TFL_CAPI_EXPORT struct TfLiteXNNPackDelegateWeightsCache*
-TfLiteXNNPackDelegateWeightsCacheCreateWithSize(size_t size);
-// Soft-finalize a weights cache. Extra space will be left in the weights cache
-// to allow for cache "insertion" only if it is a cache hit. This has memory
-// overhead compared to TfLiteXNNPackDelegateWeightsCacheFinalizeHard. Use this
-// if the number of interpreter instances using XNNPACK delegate is not fixed
-// (e.g. created based on workload in a server daemon).
-// Returns true on success, false on error.
-TFL_CAPI_EXPORT bool TfLiteXNNPackDelegateWeightsCacheFinalizeSoft(
-    struct TfLiteXNNPackDelegateWeightsCache* cache);
-// Hard-finalize a weights cache, cache is effectively frozen and no more cache
-// operations are allowed. Memory is resized to smallest possible. Use this if
-// the number of interpreter instances using XNNPACK delegate can be fixed and
-// all creation of instances can happen up front. This has the lowest memory
-// usage.
-// Returns true on success, false on error.
-TFL_CAPI_EXPORT bool TfLiteXNNPackDelegateWeightsCacheFinalizeHard(
-    struct TfLiteXNNPackDelegateWeightsCache* cache);
-// Destroys a weights cache created with
-// `TfLiteXNNPackDelegateWeightsCacheCreate` call.
-TFL_CAPI_EXPORT void TfLiteXNNPackDelegateWeightsCacheDelete(
-    struct TfLiteXNNPackDelegateWeightsCache* cache);
+void TfLiteXNNPackDelegateDelete(TfLiteDelegate* delegate);
 
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
+
+// A convenient wrapper that returns C++ std::unique_ptr for automatic memory
+// management.
+inline std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>
+TfLiteXNNPackDelegateCreateUnique(const TfLiteXNNPackDelegateOptions* options) {
+  return std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>(
+      TfLiteXNNPackDelegateCreate(options), TfLiteXNNPackDelegateDelete);
+}
 
 #endif  // TENSORFLOW_LITE_DELEGATES_XNNPACK_XNNPACK_DELEGATE_H_
