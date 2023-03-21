@@ -31,6 +31,17 @@
 #include "tensorflow/lite/kernels/internal/compatibility.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 
+
+// [humu]: include this header file for using ESP APIs
+#define __FIXED
+#define BITWIDTH 32
+#include "tensorflow/esp_libs/cfg_conv2d.h"
+#include "tensorflow/esp_libs/conv2d_helper.h"
+#include "tensorflow/esp_libs/esp_api_include.h"
+// [humu]: end for including ESP APIs
+
+
+
 namespace tflite {
 namespace {
 TfLiteRegistration GetDelegateKernelRegistration(
@@ -250,7 +261,7 @@ printf("[humu]: XNNPACK-ESP ComputeResult, builtin_code = %d\n", builtin_code);
     auto* input_2 = GetTensorData<float>(input_tensor_2);
     auto* output = GetTensorData<float>(output_tensor);
     for (int i = 0; i < NumElements(input_tensor_1); ++i) {
-      printf("[humu]: XNNPACK-ESP ComputeResult, loop = %d\n", i);
+      // printf("[humu]: XNNPACK-ESP ComputeResult, loop = %d\n", i);
 
       if (builtin_code == kTfLiteBuiltinAdd){
         output[i] = input_1[i] + input_2[i];
@@ -267,10 +278,14 @@ printf("[humu]: XNNPACK-ESP ComputeResult, builtin_code = %d\n", builtin_code);
 
       if (builtin_code == kTfLiteBuiltinConv2d){
         printf("[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinConv2d\n");
+        void *buf = NULL;
+        esp_dummy(buf);
       }
 
       if (builtin_code == kTfLiteBuiltinFullyConnected){
         printf("[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
+        void *buf = NULL;
+        esp_dummy(buf);
       }
 
     }

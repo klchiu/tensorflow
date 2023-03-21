@@ -453,6 +453,12 @@ if(TFLITE_ENABLE_ESP)
 endif()
 
 
+# if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+#   set(RUN_ON_FPGA "ON")
+# endif()
+
+
+
 if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
   populate_tflite_source_vars("delegates/external"
     TFLITE_DELEGATES_EXTERNAL_SRCS

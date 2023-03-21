@@ -23,8 +23,9 @@ extern "C"
 {
     void *esp_alloc(size_t size);
     void esp_run(esp_thread_info_t cfg[], unsigned nacc);
+    unsigned long long esp_run_no_print(esp_thread_info_t cfg[], unsigned nacc);
     void esp_free(void *buf);
-    void esp_dummy(void *buf);
+    void esp_dummy(int dummy);
 }
 
 

@@ -40,11 +40,12 @@ limitations under the License.
 
 
 // [humu]: include this header file for using ESP APIs
-#define __FIXED
-#define BITWIDTH 32
-#include "tensorflow/esp_libs/cfg_conv2d.h"
-#include "tensorflow/esp_libs/conv2d_helper.h"
-#include "tensorflow/esp_libs/esp_api_include.h"
+// #define __FIXED
+// #define BITWIDTH 32
+// #include "tensorflow/esp_libs/cfg_conv2d.h"
+// #include "tensorflow/esp_libs/conv2d_helper.h"
+// #include "tensorflow/esp_libs/esp_api_include.h"
+// [humu]: end for including ESP APIs
 
 static int humu_counter = 0;
 
