@@ -112,11 +112,16 @@ class EigenTensorConvFunctor {
     humu_counter += 1;
    int buf_i = 0;
       int b, c, x, y, cin, cout, index;
-      int do_conv2d_sw = 0;
+      // bool do_conv2d_sw = 0;
 
+      const bool do_conv2d_sw = (filter_height == 1 && filter_width == 1 &&
+                                  input_height == 1 && input_width == 1);
  
       const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                   stride_rows == 1 && stride_cols == 1);
+
+
+if(do_conv2d_sw){
 
       if (is_1x1_kernel) {
         // For 1x1 kernel, the 2D convolution is reduced to matrix
@@ -150,8 +155,7 @@ class EigenTensorConvFunctor {
       } else {
         // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
 
-if(do_conv2d_sw){
-EigenTensor output(output_data, input_batches, output_height,
+        EigenTensor output(output_data, input_batches, output_height,
                            output_width, filter_count);
         ConstEigenTensor input(input_data, input_batches, input_height,
                                input_width, input_depth);
@@ -160,6 +164,7 @@ EigenTensor output(output_data, input_batches, output_height,
         output.device(device) =
             Eigen::SpatialConvolution(input, filter, stride_cols, stride_rows,
                                       RuntimePadding2EigenPadding(padding));
+      }
 }
 else{
       // printf("const T* input_data   = %d\n", *input_data);
@@ -405,11 +410,7 @@ x = 0;
         }
 
 */
-      }
-    
-  
-  
-  
+
   
   }
 };
