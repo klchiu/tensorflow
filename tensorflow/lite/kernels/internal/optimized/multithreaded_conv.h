@@ -47,6 +47,7 @@ limitations under the License.
 #include "tensorflow/esp_libs/esp_api_include.h"
 
 static int humu_counter = 0;
+static int MEM_SIZE = 5000000;
 
 namespace tflite {
 namespace multithreaded_ops {
@@ -166,7 +167,7 @@ if(do_conv2d_sw){
                                       RuntimePadding2EigenPadding(padding));
       }
 }
-else{
+else{   // !do_conv2d_sw
       // printf("const T* input_data   = %d\n", *input_data);
       // printf("int input_batches     = %d\n", input_batches);
       // printf("int input_height      = %d\n", input_height);
@@ -207,7 +208,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
 
       token_t* acc_buf;
       // acc_buf = (token_t*)esp_alloc(MAX_SIZE);
-      acc_buf = (token_t*)esp_alloc(5000000);
+      acc_buf = (token_t*)esp_alloc(MEM_SIZE);
       cfg_conv2d[0].hw_buf = acc_buf;
 
       // set parameters
@@ -293,7 +294,11 @@ int filter_size2 = filter_height * filter_width * filter_count;
               index = b * input_height * input_width * input_depth 
                         + y * input_width * input_depth 
                         + x * input_depth + c;
-              acc_buf[buf_i] = float2fx(input_data[index], FX_IL);
+                        if(buf_i < MEM_SIZE){
+                          // [humu]: temp work around, need to fix
+              acc_buf[buf_i] = float2fx(input_data[index], FX_IL);            
+                        }
+              
               buf_i++;
       }}}}
 
@@ -308,7 +313,10 @@ int filter_size2 = filter_height * filter_width * filter_count;
               index = cin * filter_height * filter_width * filter_count
                     + y * filter_width * filter_count
                     + x * filter_count + cout;
+                    if(buf_i < MEM_SIZE){
+                          // [humu]: temp work around, need to fix
               acc_buf[buf_i] = float2fx(filter_data[index], FX_IL);
+                    }
               buf_i++;
       }}}}
         //  printf("-- buf_i = %d\n", buf_i);
@@ -317,7 +325,10 @@ int filter_size2 = filter_height * filter_width * filter_count;
       // bias offset
       float bb = 0.0;
       for (cout = 0; cout < filter_count; cout++) {
+        if(buf_i < MEM_SIZE){
+                          // [humu]: temp work around, need to fix
         acc_buf[buf_i] = float2fx(bb, FX_IL);
+        }
         buf_i++;
       }
         //  printf("-- buf_i = %d\n", buf_i);
@@ -345,7 +356,10 @@ int filter_size2 = filter_height * filter_width * filter_count;
               index = b * filter_count * output_width * output_height
                         + c * output_width * output_height
                         + x * output_height + y;
+                        if(buf_i < MEM_SIZE){
+                          // [humu]: temp work around, need to fix
                       output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
+                        }
               buf_i++;
       }}}}
         //  printf("-- buf_i = %d\n", buf_i);
