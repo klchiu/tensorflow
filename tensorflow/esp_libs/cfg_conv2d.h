@@ -115,7 +115,7 @@ struct conv2d_stratus_access conv2d_cfg_000[] = {{
     .dst_offset = 0,
 }};
 
-esp_thread_info_t cfg_000[] = {{
+esp_thread_info_t cfg_conv2d[] = {{
     .run = true,
     .devname = "conv2d_stratus.0",
     .hw_buf = NULL,
