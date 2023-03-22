@@ -158,7 +158,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
 
       token_t* acc_buf;
       acc_buf = (token_t*)esp_alloc(MAX_SIZE);
-      cfg_000[0].hw_buf = acc_buf;
+      cfg_conv2d[0].hw_buf = acc_buf;
 
       // set parameters
       conv2d_cfg_000[0].n_channels = input_depth;
@@ -273,7 +273,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
         //  printf("-- buf_i = %d\n", buf_i);
 
 
-      esp_run_no_print(cfg_000, NACC);
+      esp_run_no_print(cfg_conv2d, NACC);
 
 
       // store output
