@@ -115,34 +115,34 @@ class EigenTensorConvFunctor {
 
 
 
-/*
-    if (humu_counter == 1) {
 
-      printf("const T* input_data   = %d\n", *input_data);
-      printf("int input_batches     = %d\n", input_batches);
-      printf("int input_height      = %d\n", input_height);
-      printf("int input_width       = %d\n", input_width);
-      printf("int input_depth       = %d\n", input_depth);
-      printf("const T* filter_data  = %d\n", *filter_data);
-      printf("int filter_height     = %d\n", filter_height);
-      printf("int filter_width      = %d\n", filter_width);
-      printf("int filter_count      = %d\n", filter_count);
-      printf("int stride_rows       = %d\n", stride_rows);
-      printf("int stride_cols       = %d\n", stride_cols);
-      printf("int pad_width         = %d\n", pad_width);
-      printf("int pad_height        = %d\n", pad_height);
-      printf("PaddingType padding   = %d\n", padding);
-      printf("T* output_data        = %d\n", *output_data);
-      printf("int output_height     = %d\n", output_height);
-      printf("int output_width      = %d\n", output_width);
+    if (humu_counter > 0) {
+
+      // printf("const T* input_data   = %d\n", *input_data);
+      // printf("int input_batches     = %d\n", input_batches);
+      // printf("int input_height      = %d\n", input_height);
+      // printf("int input_width       = %d\n", input_width);
+      // printf("int input_depth       = %d\n", input_depth);
+      // printf("const T* filter_data  = %d\n", *filter_data);
+      // printf("int filter_height     = %d\n", filter_height);
+      // printf("int filter_width      = %d\n", filter_width);
+      // printf("int filter_count      = %d\n", filter_count);
+      // printf("int stride_rows       = %d\n", stride_rows);
+      // printf("int stride_cols       = %d\n", stride_cols);
+      // printf("int pad_width         = %d\n", pad_width);
+      // printf("int pad_height        = %d\n", pad_height);
+      // printf("PaddingType padding   = %d\n", padding);
+      // printf("T* output_data        = %d\n", *output_data);
+      // printf("int output_height     = %d\n", output_height);
+      // printf("int output_width      = %d\n", output_width);
 
 int input_size2 = input_batches * input_height * input_width * input_depth;
 int output_size2 = output_height * output_width;
 int filter_size2 = filter_height * filter_width * filter_count;
 
-   printf("-- input_size2 = %d\n", input_size2);
-   printf("-- output_size2 = %d\n", output_size2);
-   printf("-- filter_size2 = %d\n", filter_size2);
+  //  printf("-- input_size2 = %d\n", input_size2);
+  //  printf("-- output_size2 = %d\n", output_size2);
+  //  printf("-- filter_size2 = %d\n", filter_size2);
 
 
 // for (x = 0 ; x < input_size2; x++){
@@ -215,13 +215,13 @@ int filter_size2 = filter_height * filter_width * filter_count;
           DMA_RATIO);
 
 
-   printf("-- output_h = %d\n", output_h);
-   printf("-- output_pool_h = %d\n", output_pool_h);
-   printf("-- pad_dim = %d\n", pad_dim);
-   printf("-- in_len = %d\n", in_len);
-   printf("-- weights_len = %d\n", weights_len);
-   printf("-- bias_len = %d\n", bias_len);
-   printf("-- out_len = %d\n", out_len);
+  //  printf("-- output_h = %d\n", output_h);
+  //  printf("-- output_pool_h = %d\n", output_pool_h);
+  //  printf("-- pad_dim = %d\n", pad_dim);
+  //  printf("-- in_len = %d\n", in_len);
+  //  printf("-- weights_len = %d\n", weights_len);
+  //  printf("-- bias_len = %d\n", bias_len);
+  //  printf("-- out_len = %d\n", out_len);
 
 
 
@@ -236,7 +236,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
 
 
       // load input
-         for (b = 0; b < input_batches; b++) {
+      for (b = 0; b < input_batches; b++) {
         for (c = 0; c < input_depth; c++) {    
           for (x = 0; x < input_width; x++) {
             for (y = 0; y < input_height; y++) {    
@@ -247,7 +247,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
               buf_i++;
       }}}}
 
-   printf("-- buf_i = %d\n", buf_i);
+  //  printf("-- buf_i = %d\n", buf_i);
 
 
     // load weight
@@ -261,7 +261,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
               acc_buf[buf_i] = float2fx(filter_data[index], FX_IL);
               buf_i++;
       }}}}
-         printf("-- buf_i = %d\n", buf_i);
+        //  printf("-- buf_i = %d\n", buf_i);
 
 
       // bias offset
@@ -270,10 +270,10 @@ int filter_size2 = filter_height * filter_width * filter_count;
         acc_buf[buf_i] = float2fx(bb, FX_IL);
         buf_i++;
       }
-         printf("-- buf_i = %d\n", buf_i);
+        //  printf("-- buf_i = %d\n", buf_i);
 
 
-      esp_run(cfg_000, NACC);
+      esp_run_no_print(cfg_000, NACC);
 
 
       // store output
@@ -287,7 +287,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
                       output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
               buf_i++;
       }}}}
-         printf("-- buf_i = %d\n", buf_i);
+        //  printf("-- buf_i = %d\n", buf_i);
 
 
  
@@ -295,13 +295,13 @@ int filter_size2 = filter_height * filter_width * filter_count;
 
           if(humu_counter == 1){
           for (x = 0 ; x < 100; x++){
-            printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
+            // printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
           }
         }
 
     }
-*/
-    if (humu_counter > 0) {
+
+    if (humu_counter < 0) {
       const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                   stride_rows == 1 && stride_cols == 1);
 
