@@ -108,16 +108,60 @@ class EigenTensorConvFunctor {
                   PaddingType padding, T* output_data, int output_height,
                   int output_width) {
     // [humu]: invoke the accelerator here
-    printf("-- humu_counter = %d\n", humu_counter);
+    // printf("-- humu_counter = %d\n", humu_counter);
     humu_counter += 1;
    int buf_i = 0;
       int b, c, x, y, cin, cout, index;
+      int do_conv2d_sw = 0;
 
+ 
+      const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
+                                  stride_rows == 1 && stride_cols == 1);
 
+      if (is_1x1_kernel) {
+        // For 1x1 kernel, the 2D convolution is reduced to matrix
+        // multiplication.
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 0\n");
 
+   const int conv_width = output_height * output_width;
+      Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
+      dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
+      EigenMatrix output(output_data, input_batches * conv_width, filter_count);
+      ConstEigenMatrix input(input_data, input_batches * conv_width,
+                             input_depth);
+      ConstEigenMatrix filter(filter_data, input_depth, filter_count);
+      MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
+                                                      filter, dim_pair);
+      } else if (filter_height == input_height && filter_width == input_width &&
+                 pad_width == 0 && pad_height == 0) {
+        // If the input data and filter have the same height/width,
+        // the 2D convolution is reduced to matrix multiplication.
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 1\n");
 
-    if (humu_counter > 0) {
+        const int k =  // Length of reduction dimension.
+            filter_width * filter_height * input_depth;
+        Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
+        dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
+        EigenMatrix output(output_data, input_batches, filter_count);
+        ConstEigenMatrix input(input_data, input_batches, k);
+        ConstEigenMatrix filter(filter_data, k, filter_count);
+        MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
+                                                        filter, dim_pair);
+      } else {
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
 
+if(do_conv2d_sw){
+EigenTensor output(output_data, input_batches, output_height,
+                           output_width, filter_count);
+        ConstEigenTensor input(input_data, input_batches, input_height,
+                               input_width, input_depth);
+        ConstEigenTensor filter(filter_data, filter_height, filter_width,
+                                input_depth, filter_count);
+        output.device(device) =
+            Eigen::SpatialConvolution(input, filter, stride_cols, stride_rows,
+                                      RuntimePadding2EigenPadding(padding));
+}
+else{
       // printf("const T* input_data   = %d\n", *input_data);
       // printf("int input_batches     = %d\n", input_batches);
       // printf("int input_height      = %d\n", input_height);
@@ -157,7 +201,8 @@ int filter_size2 = filter_height * filter_width * filter_count;
       // // esp_dummy(buf);
 
       token_t* acc_buf;
-      acc_buf = (token_t*)esp_alloc(MAX_SIZE);
+      // acc_buf = (token_t*)esp_alloc(MAX_SIZE);
+      acc_buf = (token_t*)esp_alloc(5000000);
       cfg_conv2d[0].hw_buf = acc_buf;
 
       // set parameters
@@ -272,9 +317,20 @@ int filter_size2 = filter_height * filter_width * filter_count;
       }
         //  printf("-- buf_i = %d\n", buf_i);
 
+// printf("[humu]: before esp_run\n");
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_channels = %d\n", conv2d_cfg_000[0].n_channels);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_height = %d\n", conv2d_cfg_000[0].feature_map_height);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_width = %d\n", conv2d_cfg_000[0].feature_map_width);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_filters = %d\n", conv2d_cfg_000[0].n_filters);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, filter_dim = %d\n", conv2d_cfg_000[0].filter_dim);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, is_padded = %d\n", conv2d_cfg_000[0].is_padded);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, stride = %d\n", conv2d_cfg_000[0].stride);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, do_relu = %d\n", conv2d_cfg_000[0].do_relu);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
+//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
 
       esp_run_no_print(cfg_conv2d, NACC);
-
+// printf("[humu]: after esp_run\n");
 
       // store output
       for (b = 0; b < input_batches; b++) {
@@ -294,62 +350,15 @@ int filter_size2 = filter_height * filter_width * filter_count;
       esp_free(acc_buf);
 
           if(humu_counter == 1){
-          for (x = 0 ; x < 100; x++){
+          // for (x = 0 ; x < 100; x++){
             // printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
-          }
+          // }
         }
 
     }
 
-    if (humu_counter < 0) {
-      const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
-                                  stride_rows == 1 && stride_cols == 1);
 
-      if (is_1x1_kernel) {
-        // For 1x1 kernel, the 2D convolution is reduced to matrix
-        // multiplication.
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 0\n");
-
-   const int conv_width = output_height * output_width;
-      Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
-      dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
-      EigenMatrix output(output_data, input_batches * conv_width, filter_count);
-      ConstEigenMatrix input(input_data, input_batches * conv_width,
-                             input_depth);
-      ConstEigenMatrix filter(filter_data, input_depth, filter_count);
-      MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
-                                                      filter, dim_pair);
-      } else if (filter_height == input_height && filter_width == input_width &&
-                 pad_width == 0 && pad_height == 0) {
-        // If the input data and filter have the same height/width,
-        // the 2D convolution is reduced to matrix multiplication.
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 1\n");
-
-        const int k =  // Length of reduction dimension.
-            filter_width * filter_height * input_depth;
-        Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
-        dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
-        EigenMatrix output(output_data, input_batches, filter_count);
-        ConstEigenMatrix input(input_data, input_batches, k);
-        ConstEigenMatrix filter(filter_data, k, filter_count);
-        MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
-                                                        filter, dim_pair);
-      } else {
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
-
-        EigenTensor output(output_data, input_batches, output_height,
-                           output_width, filter_count);
-        ConstEigenTensor input(input_data, input_batches, input_height,
-                               input_width, input_depth);
-        ConstEigenTensor filter(filter_data, filter_height, filter_width,
-                                input_depth, filter_count);
-        output.device(device) =
-            Eigen::SpatialConvolution(input, filter, stride_cols, stride_rows,
-                                      RuntimePadding2EigenPadding(padding));
-
-
-
-
+/*
         if(humu_counter == 1){
           FILE *log_input;
           log_input = fopen("log_input.txt", "w");
@@ -395,9 +404,13 @@ x = 0;
 
         }
 
-
+*/
       }
-    }
+    
+  
+  
+  
+  
   }
 };
 
