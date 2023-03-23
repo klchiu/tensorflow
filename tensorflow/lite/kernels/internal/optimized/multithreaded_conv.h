@@ -287,50 +287,53 @@ int filter_size2 = filter_height * filter_width * filter_count;
 
 
       // load input
-      for (b = 0; b < input_batches; b++) {
-        for (c = 0; c < input_depth; c++) {    
-          for (x = 0; x < input_width; x++) {
-            for (y = 0; y < input_height; y++) {    
-              index = b * input_height * input_width * input_depth 
-                        + y * input_width * input_depth 
-                        + x * input_depth + c;
-                        if(buf_i < MEM_SIZE){
-                          // [humu]: temp work around, need to fix
-              acc_buf[buf_i] = float2fx(input_data[index], FX_IL);            
-                        }
+      // fprintf(stderr, "[humu]: debug 0, load input\n");
+      // for (b = 0; b < input_batches; b++) {
+      //   for (c = 0; c < input_depth; c++) {    
+      //     for (x = 0; x < input_width; x++) {
+      //       for (y = 0; y < input_height; y++) {    
+      //         index = b * input_height * input_width * input_depth 
+      //                   + y * input_width * input_depth 
+      //                   + x * input_depth + c;
+      //                   if(buf_i < MEM_SIZE){
+      //                     // [humu]: temp work around, need to fix
+      //         acc_buf[buf_i] = float2fx(input_data[index], FX_IL);            
+      //                   }
               
-              buf_i++;
-      }}}}
+      //         buf_i++;
+      // }}}}
 
   //  printf("-- buf_i = %d\n", buf_i);
 
 
     // load weight
-    for (cout = 0; cout < filter_count; cout++) {
-      for (cin = 0; cin < input_depth; cin++) {
-        for (x = 0; x < filter_width; x++) {
-          for (y = 0; y < filter_height; y++) {
-              index = cin * filter_height * filter_width * filter_count
-                    + y * filter_width * filter_count
-                    + x * filter_count + cout;
-                    if(buf_i < MEM_SIZE){
-                          // [humu]: temp work around, need to fix
-              acc_buf[buf_i] = float2fx(filter_data[index], FX_IL);
-                    }
-              buf_i++;
-      }}}}
+    // fprintf(stderr, "[humu]: debug 0, load weight\n");
+    // for (cout = 0; cout < filter_count; cout++) {
+    //   for (cin = 0; cin < input_depth; cin++) {
+    //     for (x = 0; x < filter_width; x++) {
+    //       for (y = 0; y < filter_height; y++) {
+    //           index = cin * filter_height * filter_width * filter_count
+    //                 + y * filter_width * filter_count
+    //                 + x * filter_count + cout;
+    //                 if(buf_i < MEM_SIZE){
+    //                       // [humu]: temp work around, need to fix
+    //           acc_buf[buf_i] = float2fx(filter_data[index], FX_IL);
+    //                 }
+    //           buf_i++;
+    //   }}}}
         //  printf("-- buf_i = %d\n", buf_i);
 
 
       // bias offset
-      float bb = 0.0;
-      for (cout = 0; cout < filter_count; cout++) {
-        if(buf_i < MEM_SIZE){
-                          // [humu]: temp work around, need to fix
-        acc_buf[buf_i] = float2fx(bb, FX_IL);
-        }
-        buf_i++;
-      }
+      // fprintf(stderr, "[humu]: debug 0, load bias\n");
+      // float bb = 0.0;
+      // for (cout = 0; cout < filter_count; cout++) {
+      //   if(buf_i < MEM_SIZE){
+      //                     // [humu]: temp work around, need to fix
+      //   acc_buf[buf_i] = float2fx(bb, FX_IL);
+      //   }
+      //   buf_i++;
+      // }
         //  printf("-- buf_i = %d\n", buf_i);
 
 // printf("[humu]: before esp_run\n");
@@ -345,34 +348,36 @@ int filter_size2 = filter_height * filter_width * filter_count;
 //   printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
 //   printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
 
+// fprintf(stderr, "[humu]: debug 0, before run\n");
       esp_run_no_print(cfg_conv2d, NACC);
 // printf("[humu]: after esp_run\n");
 
       // store output
-      for (b = 0; b < input_batches; b++) {
-        for (y = 0; y < output_height; y++) {    
-          for (x = 0; x < output_width; x++) {
-            for (c = 0; c < filter_count; c++) {
-              index = b * filter_count * output_width * output_height
-                        + c * output_width * output_height
-                        + x * output_height + y;
-                        if(buf_i < MEM_SIZE){
-                          // [humu]: temp work around, need to fix
-                      output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
-                        }
-              buf_i++;
-      }}}}
+      // fprintf(stderr, "[humu]: debug 0, store output\n");
+      // for (b = 0; b < input_batches; b++) {
+      //   for (y = 0; y < output_height; y++) {    
+      //     for (x = 0; x < output_width; x++) {
+      //       for (c = 0; c < filter_count; c++) {
+      //         index = b * filter_count * output_width * output_height
+      //                   + c * output_width * output_height
+      //                   + x * output_height + y;
+      //                   if(buf_i < MEM_SIZE){
+      //                     // [humu]: temp work around, need to fix
+      //                 output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
+      //                   }
+      //         buf_i++;
+      // }}}}
         //  printf("-- buf_i = %d\n", buf_i);
 
 
- 
+//  fprintf(stderr, "[humu]: debug 0, free\n");
       esp_free(acc_buf);
 
-          if(humu_counter == 1){
+          // if(humu_counter == 1){
           // for (x = 0 ; x < 100; x++){
             // printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
           // }
-        }
+        // }
 
     }
 
