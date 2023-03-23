@@ -380,7 +380,7 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     // fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: NumElements(output_tensor) = %d\n",  NumElements(output_tensor));
 
     // fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, loop = %d\n", i);
-
+/*
     if (builtin_code == kTfLiteBuiltinAdd) {
       //   fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinAdd\n");
 
@@ -413,10 +413,10 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_add3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
@@ -457,10 +457,10 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_add3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
-        // fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
+        fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
@@ -809,20 +809,12 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         return kTfLiteOk;
       }
     }
+*/
 
 
 
 
 
-
-
-    if (builtin_code == kTfLiteBuiltinConv2d) {
-      // fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult:
-      // kTfLiteBuiltinConv2d\n"); void* buf = NULL; esp_dummy(3);
-
-      // TfLiteTensor* input = input_tensor_1;
-      // TfLiteTensor* filter = input_tensor_2;
-    }
 
     if (builtin_code == kTfLiteBuiltinFullyConnected) {
       fprintf(stderr,
@@ -859,10 +851,11 @@ class XNNPackDelegate : public SimpleDelegateInterface {
                                  const TfLiteNode* node,
                                  TfLiteContext* context) const override {
     // Only supports Add and Sub ops.
-    if (registration->builtin_code != kTfLiteBuiltinAdd &&
-        registration->builtin_code != kTfLiteBuiltinSub &&
-        registration->builtin_code != kTfLiteBuiltinConv2d &&
-        registration->builtin_code != kTfLiteBuiltinFullyConnected)
+    if (
+      // registration->builtin_code != kTfLiteBuiltinAdd &&
+        // registration->builtin_code != kTfLiteBuiltinSub &&
+        // registration->builtin_code != kTfLiteBuiltinFullyConnected &&
+        registration->builtin_code != kTfLiteBuiltinConv2d)
       return false;
 
     // This delegate only supports float32 types.
