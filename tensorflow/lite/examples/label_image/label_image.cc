@@ -349,6 +349,12 @@ void RunInference(Settings* settings,
             << (get_us(stop_time) - get_us(start_time)) /
                    (settings->loop_count * 1000)
             << " ms";
+  LOG(INFO) << "total time: "
+            << (get_us(stop_time) - get_us(start_time)) / 1000
+            << " ms";
+  LOG(INFO) << "loop_count: "
+            << settings->loop_count
+            << " ms";
 
   if (settings->profiling) {
     profiler->StopProfiling();

@@ -67,9 +67,10 @@ int main(int argc, char* argv[]) {
   TFLITE_MINIMAL_CHECK(interpreter != nullptr);
 
   // Allocate tensor buffers.
+  printf("\n\n=== [humu]: 0 ===\n");
   TFLITE_MINIMAL_CHECK(interpreter->AllocateTensors() == kTfLiteOk);
   printf("=== Pre-invoke Interpreter State ===\n");
-  tflite::PrintInterpreterState(interpreter.get());
+  // tflite::PrintInterpreterState(interpreter.get());
 
   // Fill input buffers
   // TODO(user): Insert code to fill input tensors.
@@ -77,9 +78,10 @@ int main(int argc, char* argv[]) {
   // be accessed with `T* input = interpreter->typed_input_tensor<T>(i);`
 
   // Run inference
+  printf("\n\n=== [humu]: 1 ===\n");
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
   printf("\n\n=== Post-invoke Interpreter State ===\n");
-  tflite::PrintInterpreterState(interpreter.get());
+  // tflite::PrintInterpreterState(interpreter.get());
 
 
 // void *buf = NULL;

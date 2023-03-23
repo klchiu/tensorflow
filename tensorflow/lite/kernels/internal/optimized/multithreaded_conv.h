@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/types.h>
 
 #include <algorithm>
@@ -32,12 +33,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/optimized/eigen_spatial_convolutions.h"
 #include "tensorflow/lite/kernels/internal/optimized/optimized_ops.h"
 #include "tensorflow/lite/kernels/internal/types.h"
-
-
-
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
-#include <stdio.h>
-
 
 // [humu]: include this header file for using ESP APIs
 // #define __FIXED
@@ -109,16 +105,13 @@ class EigenTensorConvFunctor {
                   PaddingType padding, T* output_data, int output_height,
                   int output_width) {
     // [humu]: invoke the accelerator here
-    printf("-- humu_counter = %d\n", humu_counter);
+    // printf("-- humu_counter = %d\n", humu_counter);
     humu_counter += 1;
-   int buf_i = 0;
-      int b, c, x, y, cin, cout, index;
-
-
+    int buf_i = 0;
+    int b, c, x, y, cin, cout, index;
 
 /*
-    if (humu_counter == 1) {
-
+    if (humu_counter < 15) {
       printf("const T* input_data   = %d\n", *input_data);
       printf("int input_batches     = %d\n", input_batches);
       printf("int input_height      = %d\n", input_height);
@@ -137,22 +130,21 @@ class EigenTensorConvFunctor {
       printf("int output_height     = %d\n", output_height);
       printf("int output_width      = %d\n", output_width);
 
-int input_size2 = input_batches * input_height * input_width * input_depth;
-int output_size2 = output_height * output_width;
-int filter_size2 = filter_height * filter_width * filter_count;
+      int input_size2 =
+          input_batches * input_height * input_width * input_depth;
+      int output_size2 = output_height * output_width;
+      int filter_size2 = filter_height * filter_width * filter_count;
 
-   printf("-- input_size2 = %d\n", input_size2);
-   printf("-- output_size2 = %d\n", output_size2);
-   printf("-- filter_size2 = %d\n", filter_size2);
+      //  printf("-- input_size2 = %d\n", input_size2);
+      //  printf("-- output_size2 = %d\n", output_size2);
+      //  printf("-- filter_size2 = %d\n", filter_size2);
 
-
-// for (x = 0 ; x < input_size2; x++){
-//   printf("-- input_data[%d] = %f\n", x, input_data[x]);
-// }
-// for (x = 0 ; x < filter_size2; x++){
-//   printf("-- filter_data[%d] = %f\n", x, filter_data[x]);
-// }
-
+      // for (x = 0 ; x < input_size2; x++){
+      //   printf("-- input_data[%d] = %f\n", x, input_data[x]);
+      // }
+      // for (x = 0 ; x < filter_size2; x++){
+      //   printf("-- filter_data[%d] = %f\n", x, filter_data[x]);
+      // }
 
       // // void *buf = NULL;
       // // esp_dummy(buf);
@@ -215,16 +207,13 @@ int filter_size2 = filter_height * filter_width * filter_count;
                        DMA_RATIO),
           DMA_RATIO);
 
-
-   printf("-- output_h = %d\n", output_h);
-   printf("-- output_pool_h = %d\n", output_pool_h);
-   printf("-- pad_dim = %d\n", pad_dim);
-   printf("-- in_len = %d\n", in_len);
-   printf("-- weights_len = %d\n", weights_len);
-   printf("-- bias_len = %d\n", bias_len);
-   printf("-- out_len = %d\n", out_len);
-
-
+      //  printf("-- output_h = %d\n", output_h);
+      //  printf("-- output_pool_h = %d\n", output_pool_h);
+      //  printf("-- pad_dim = %d\n", pad_dim);
+      //  printf("-- in_len = %d\n", in_len);
+      //  printf("-- weights_len = %d\n", weights_len);
+      //  printf("-- bias_len = %d\n", bias_len);
+      //  printf("-- out_len = %d\n", out_len);
 
       // *in_size        = *in_len * sizeof(token_t);
       // *weights_size   = *weights_len * sizeof(token_t);
@@ -235,35 +224,36 @@ int filter_size2 = filter_height * filter_width * filter_count;
       // *out_offset     = *in_len + *weights_len + *bias_len;
       // *size           = *in_size + *weights_size + *bias_size + *out_size;
 
-
       // load input
-         for (b = 0; b < input_batches; b++) {
-        for (c = 0; c < input_depth; c++) {    
+      for (b = 0; b < input_batches; b++) {
+        for (c = 0; c < input_depth; c++) {
           for (x = 0; x < input_width; x++) {
-            for (y = 0; y < input_height; y++) {    
-              index = b * input_height * input_width * input_depth 
-                        + y * input_width * input_depth 
-                        + x * input_depth + c;
+            for (y = 0; y < input_height; y++) {
+              index = b * input_height * input_width * input_depth +
+                      y * input_width * input_depth + x * input_depth + c;
               acc_buf[buf_i] = float2fx(input_data[index], FX_IL);
               buf_i++;
-      }}}}
+            }
+          }
+        }
+      }
 
-   printf("-- buf_i = %d\n", buf_i);
+      //  printf("-- buf_i = %d\n", buf_i);
 
-
-    // load weight
-    for (cout = 0; cout < filter_count; cout++) {
-      for (cin = 0; cin < input_depth; cin++) {
-        for (x = 0; x < filter_width; x++) {
-          for (y = 0; y < filter_height; y++) {
-              index = cin * filter_height * filter_width * filter_count
-                    + y * filter_width * filter_count
-                    + x * filter_count + cout;
+      // load weight
+      for (cout = 0; cout < filter_count; cout++) {
+        for (cin = 0; cin < input_depth; cin++) {
+          for (x = 0; x < filter_width; x++) {
+            for (y = 0; y < filter_height; y++) {
+              index = cin * filter_height * filter_width * filter_count +
+                      y * filter_width * filter_count + x * filter_count + cout;
               acc_buf[buf_i] = float2fx(filter_data[index], FX_IL);
               buf_i++;
-      }}}}
-         printf("-- buf_i = %d\n", buf_i);
-
+            }
+          }
+        }
+      }
+      //  printf("-- buf_i = %d\n", buf_i);
 
       // bias offset
       float bb = 0.0;
@@ -271,60 +261,59 @@ int filter_size2 = filter_height * filter_width * filter_count;
         acc_buf[buf_i] = float2fx(bb, FX_IL);
         buf_i++;
       }
-         printf("-- buf_i = %d\n", buf_i);
-
+      //  printf("-- buf_i = %d\n", buf_i);
 
       esp_run(cfg_000, NACC);
 
-
       // store output
       for (b = 0; b < input_batches; b++) {
-        for (y = 0; y < output_height; y++) {    
+        for (y = 0; y < output_height; y++) {
           for (x = 0; x < output_width; x++) {
             for (c = 0; c < filter_count; c++) {
-              index = b * filter_count * output_width * output_height
-                        + c * output_width * output_height
-                        + x * output_height + y;
-                      output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
+              index = b * filter_count * output_width * output_height +
+                      c * output_width * output_height + x * output_height + y;
+              output_data[index] = fx2float(acc_buf[buf_i], FX_IL);
               buf_i++;
-      }}}}
-         printf("-- buf_i = %d\n", buf_i);
-
-
- 
-      esp_free(acc_buf);
-
-          if(humu_counter == 1){
-          for (x = 0 ; x < 100; x++){
-            printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
+            }
           }
         }
+      }
+      //  printf("-- buf_i = %d\n", buf_i);
 
+      esp_free(acc_buf);
+
+      //   if(humu_counter == 1){
+      //   for (x = 0 ; x < 100; x++){
+      //     printf("acc -- output_data[%d] = %f\n", x, output_data[x]);
+      //   }
+      // }
     }
 */
-    if (humu_counter > 0) {
+
+    // if (humu_counter >= 15) {
       const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                   stride_rows == 1 && stride_cols == 1);
 
       if (is_1x1_kernel) {
         // For 1x1 kernel, the 2D convolution is reduced to matrix
         // multiplication.
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 0\n");
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 0\n");
 
-   const int conv_width = output_height * output_width;
-      Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
-      dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
-      EigenMatrix output(output_data, input_batches * conv_width, filter_count);
-      ConstEigenMatrix input(input_data, input_batches * conv_width,
-                             input_depth);
-      ConstEigenMatrix filter(filter_data, input_depth, filter_count);
-      MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
-                                                      filter, dim_pair);
+        const int conv_width = output_height * output_width;
+        Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
+        dim_pair[0] = Eigen::IndexPair<Eigen::DenseIndex>(1, 0);
+        EigenMatrix output(output_data, input_batches * conv_width,
+                           filter_count);
+        ConstEigenMatrix input(input_data, input_batches * conv_width,
+                               input_depth);
+        ConstEigenMatrix filter(filter_data, input_depth, filter_count);
+        MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
+                                                        filter, dim_pair);
       } else if (filter_height == input_height && filter_width == input_width &&
                  pad_width == 0 && pad_height == 0) {
         // If the input data and filter have the same height/width,
         // the 2D convolution is reduced to matrix multiplication.
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 1\n");
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 1\n");
 
         const int k =  // Length of reduction dimension.
             filter_width * filter_height * input_depth;
@@ -336,7 +325,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
         MatMulConvFunctor<Eigen::ThreadPoolDevice, T>()(device, output, input,
                                                         filter, dim_pair);
       } else {
-        printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
+        // printf("[humu]: multithreaded_conv.h: EigenTensorConvFunctor 2\n");
 
         EigenTensor output(output_data, input_batches, output_height,
                            output_width, filter_count);
@@ -348,57 +337,62 @@ int filter_size2 = filter_height * filter_width * filter_count;
             Eigen::SpatialConvolution(input, filter, stride_cols, stride_rows,
                                       RuntimePadding2EigenPadding(padding));
 
+        // if (humu_counter == 1) {
+        //   FILE* log_input;
+        //   log_input = fopen("log_input.txt", "w");
+        //   FILE* log_filter;
+        //   log_filter = fopen("log_filter.txt", "w");
+        //   FILE* log_output;
+        //   log_output = fopen("log_output.txt", "w");
 
+        //   x = 0;
+        //   for (b = 0; b < input_batches; b++) {
+        //     for (c = 0; c < input_depth; c++) {
+        //       for (x = 0; x < input_width; x++) {
+        //         for (y = 0; y < input_height; y++) {
+        //           // fprintf(log_input, "input_data[%d] = %f\n", x,
+        //           // input_data[x]);
+        //           fprintf(log_input, "%f\n", x, input_data[x]);
+        //           x++;
+        //         }
+        //       }
+        //     }
+        //   }
 
+        //   x = 0;
+        //   for (cout = 0; cout < filter_count; cout++) {
+        //     for (cin = 0; cin < input_depth; cin++) {
+        //       for (x = 0; x < filter_width; x++) {
+        //         for (y = 0; y < filter_height; y++) {
+        //           // fprintf(log_filter, "filter_data[%d] = %f\n", x,
+        //           // filter_data[x]);
+        //           fprintf(log_filter, "%f\n", x, filter_data[x]);
+        //           x++;
+        //         }
+        //       }
+        //     }
+        //   }
 
-        if(humu_counter == 1){
-          FILE *log_input;
-          log_input = fopen("log_input.txt", "w");
-          FILE *log_filter;
-          log_filter = fopen("log_filter.txt", "w");
-          FILE *log_output;
-          log_output = fopen("log_output.txt", "w");
+        //   x = 0;
+        //   for (b = 0; b < input_batches; b++) {
+        //     for (y = 0; y < output_height; y++) {
+        //       for (x = 0; x < output_width; x++) {
+        //         for (c = 0; c < filter_count;
+        //              c++) {  // fprintf(log_output, "output_data[%d] = %f\n", x,
+        //                      // output_data[x]);
+        //           fprintf(log_output, "%f\n", x, output_data[x]);
+        //           x++;
+        //         }
+        //       }
+        //     }
+        //   }
 
-          x = 0;
-               for (b = 0; b < input_batches; b++) {
-        for (c = 0; c < input_depth; c++) {    
-          for (x = 0; x < input_width; x++) {
-            for (y = 0; y < input_height; y++) {   
-            // fprintf(log_input, "input_data[%d] = %f\n", x, input_data[x]);
-            fprintf(log_input, "%f\n", x, input_data[x]);
-            x++;
-            }}}}
-          
-x = 0;
-  for (cout = 0; cout < filter_count; cout++) {
-      for (cin = 0; cin < input_depth; cin++) {
-        for (x = 0; x < filter_width; x++) {
-          for (y = 0; y < filter_height; y++) {        
-                // fprintf(log_filter, "filter_data[%d] = %f\n", x, filter_data[x]);
-            fprintf(log_filter, "%f\n", x, filter_data[x]);
-            x++;
-          }}}}
-
-
-x = 0;
-  for (b = 0; b < input_batches; b++) {
-        for (y = 0; y < output_height; y++) {    
-          for (x = 0; x < output_width; x++) {
-            for (c = 0; c < filter_count; c++) {            // fprintf(log_output, "output_data[%d] = %f\n", x, output_data[x]);
-            fprintf(log_output, "%f\n", x, output_data[x]);
-            x++;
-          }}}}
-
-          fclose(log_input);
-          fclose(log_filter);
-          fclose(log_output);
-
-
-        }
-
-
+        //   fclose(log_input);
+        //   fclose(log_filter);
+        //   fclose(log_output);
+        // }
       }
-    }
+    // }
   }
 };
 
