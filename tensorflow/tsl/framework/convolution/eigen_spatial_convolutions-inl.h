@@ -1620,9 +1620,9 @@ SpatialConvolution(const Input& input, const Kernel& kernel,
 
   const int NumDims = internal::traits<Input>::NumDimensions;
 
-printf("[humu]: Inside SpatialConvolution\n");
-printf("[humu]: Inside SpatialConvolution, NumDims = %d\n", NumDims);
-printf("[humu]: Inside SpatialConvolution, isColMajor = %d\n", isColMajor);
+// printf("[humu]: Inside SpatialConvolution\n");
+// printf("[humu]: Inside SpatialConvolution, NumDims = %d\n", NumDims);
+// printf("[humu]: Inside SpatialConvolution, isColMajor = %d\n", isColMajor);
 
 
   // Number of filters to apply. This is the same as the output depth of the

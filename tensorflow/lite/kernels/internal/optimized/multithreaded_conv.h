@@ -115,11 +115,65 @@ class EigenTensorConvFunctor {
       int b, c, x, y, cin, cout, index;
       // bool do_conv2d_sw = 0;
 
-      const bool do_conv2d_sw = (filter_height == 1 && filter_width == 1 &&
+      bool do_conv2d_sw = (filter_height == 1 && filter_width == 1 &&
                                   input_height == 1 && input_width == 1);
  
       const bool is_1x1_kernel = (filter_height == 1 && filter_width == 1 &&
                                   stride_rows == 1 && stride_cols == 1);
+
+
+ // set ACC parameters
+      conv2d_cfg_000[0].n_channels = input_depth;
+      conv2d_cfg_000[0].feature_map_height = input_height;
+      conv2d_cfg_000[0].feature_map_width = input_width;
+      conv2d_cfg_000[0].n_filters = filter_count;
+      conv2d_cfg_000[0].filter_dim =
+          filter_height;  // should be the same as filter_width
+      if (padding == tflite::PaddingType::kSame) {
+        conv2d_cfg_000[0].is_padded = 1;
+      } else {
+        conv2d_cfg_000[0].is_padded = 0;
+      }
+      conv2d_cfg_000[0].stride =
+          stride_rows;                  // should be the same as stride_cols
+      conv2d_cfg_000[0].do_relu = 0;    // this function doesn't do relu (?)
+      conv2d_cfg_000[0].pool_type = 0;  // this function doesn't do pooling (?)
+      conv2d_cfg_000[0].batch_size = input_batches;
+
+// [humu]: don't do esp_run for a specific case (squeezenet)
+if(
+  conv2d_cfg_000[0].n_channels == 16  &&
+  conv2d_cfg_000[0].feature_map_height == 55  &&
+  conv2d_cfg_000[0].feature_map_width == 55 &&
+  conv2d_cfg_000[0].n_filters == 64 &&
+  conv2d_cfg_000[0].filter_dim == 3 &&
+  conv2d_cfg_000[0].is_padded == 1  &&
+  conv2d_cfg_000[0].stride == 1 &&
+  conv2d_cfg_000[0].do_relu == 0  &&
+  conv2d_cfg_000[0].pool_type == 0  &&
+  conv2d_cfg_000[0].batch_size == 1
+){
+  do_conv2d_sw = 1;
+}
+if(
+  conv2d_cfg_000[0].n_channels == 32 &&
+  conv2d_cfg_000[0].feature_map_height == 55 &&
+  conv2d_cfg_000[0].feature_map_width == 55 &&
+  conv2d_cfg_000[0].n_filters == 128 &&
+  conv2d_cfg_000[0].filter_dim == 3 &&
+  conv2d_cfg_000[0].is_padded == 1 &&
+  conv2d_cfg_000[0].stride == 1 &&
+  conv2d_cfg_000[0].do_relu == 0 &&
+  conv2d_cfg_000[0].pool_type == 0 &&
+  conv2d_cfg_000[0].batch_size == 1
+){
+  do_conv2d_sw = 1;
+}
+if(conv2d_cfg_000[0].filter_dim == 3){
+  do_conv2d_sw = 1;
+}
+
+
 
 
 if(do_conv2d_sw){
@@ -211,23 +265,7 @@ int filter_size2 = filter_height * filter_width * filter_count;
       acc_buf = (token_t*)esp_alloc(MEM_SIZE);
       cfg_conv2d[0].hw_buf = acc_buf;
 
-      // set parameters
-      conv2d_cfg_000[0].n_channels = input_depth;
-      conv2d_cfg_000[0].feature_map_height = input_height;
-      conv2d_cfg_000[0].feature_map_width = input_width;
-      conv2d_cfg_000[0].n_filters = filter_count;
-      conv2d_cfg_000[0].filter_dim =
-          filter_height;  // should be the same as filter_width
-      if (padding == tflite::PaddingType::kSame) {
-        conv2d_cfg_000[0].is_padded = 1;
-      } else {
-        conv2d_cfg_000[0].is_padded = 0;
-      }
-      conv2d_cfg_000[0].stride =
-          stride_rows;                  // should be the same as stride_cols
-      conv2d_cfg_000[0].do_relu = 0;    // this function doesn't do relu (?)
-      conv2d_cfg_000[0].pool_type = 0;  // this function doesn't do pooling (?)
-      conv2d_cfg_000[0].batch_size = input_batches;
+     
 
       // setup buffer
 
@@ -336,17 +374,17 @@ int filter_size2 = filter_height * filter_width * filter_count;
       // }
         //  printf("-- buf_i = %d\n", buf_i);
 
-// printf("[humu]: before esp_run\n");
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_channels = %d\n", conv2d_cfg_000[0].n_channels);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_height = %d\n", conv2d_cfg_000[0].feature_map_height);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_width = %d\n", conv2d_cfg_000[0].feature_map_width);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_filters = %d\n", conv2d_cfg_000[0].n_filters);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, filter_dim = %d\n", conv2d_cfg_000[0].filter_dim);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, is_padded = %d\n", conv2d_cfg_000[0].is_padded);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, stride = %d\n", conv2d_cfg_000[0].stride);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, do_relu = %d\n", conv2d_cfg_000[0].do_relu);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
-//   printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
+
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_channels = %d\n", conv2d_cfg_000[0].n_channels);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_height = %d\n", conv2d_cfg_000[0].feature_map_height);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_width = %d\n", conv2d_cfg_000[0].feature_map_width);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_filters = %d\n", conv2d_cfg_000[0].n_filters);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, filter_dim = %d\n", conv2d_cfg_000[0].filter_dim);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, is_padded = %d\n", conv2d_cfg_000[0].is_padded);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, stride = %d\n", conv2d_cfg_000[0].stride);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, do_relu = %d\n", conv2d_cfg_000[0].do_relu);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
+  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
 
 // fprintf(stderr, "[humu]: debug 0, before run\n");
       esp_run_no_print(cfg_conv2d, NACC);
