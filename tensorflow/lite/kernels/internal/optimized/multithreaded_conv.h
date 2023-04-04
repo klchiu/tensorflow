@@ -375,16 +375,16 @@ int filter_size2 = filter_height * filter_width * filter_count;
         //  printf("-- buf_i = %d\n", buf_i);
 
 
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_channels = %d\n", conv2d_cfg_000[0].n_channels);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_height = %d\n", conv2d_cfg_000[0].feature_map_height);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_width = %d\n", conv2d_cfg_000[0].feature_map_width);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_filters = %d\n", conv2d_cfg_000[0].n_filters);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, filter_dim = %d\n", conv2d_cfg_000[0].filter_dim);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, is_padded = %d\n", conv2d_cfg_000[0].is_padded);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, stride = %d\n", conv2d_cfg_000[0].stride);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, do_relu = %d\n", conv2d_cfg_000[0].do_relu);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
-  // printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_channels = %d\n", conv2d_cfg_000[0].n_channels);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_height = %d\n", conv2d_cfg_000[0].feature_map_height);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, feature_map_width = %d\n", conv2d_cfg_000[0].feature_map_width);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, n_filters = %d\n", conv2d_cfg_000[0].n_filters);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, filter_dim = %d\n", conv2d_cfg_000[0].filter_dim);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, is_padded = %d\n", conv2d_cfg_000[0].is_padded);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, stride = %d\n", conv2d_cfg_000[0].stride);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, do_relu = %d\n", conv2d_cfg_000[0].do_relu);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, pool_type = %d\n", conv2d_cfg_000[0].pool_type);
+  printf("[humu]: doConv2dAcc: conv2d_cfg_000, batch_size = %d\n", conv2d_cfg_000[0].batch_size);
 
 // fprintf(stderr, "[humu]: debug 0, before run\n");
       esp_run_no_print(cfg_conv2d, NACC);
