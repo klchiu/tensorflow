@@ -79,7 +79,15 @@ int main(int argc, char* argv[]) {
 
   // Run inference
   printf("\n\n=== [humu]: 1 ===\n");
+  struct timeval start_time, stop_time;
+  gettimeofday(&start_time, nullptr);
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
+  gettimeofday(&stop_time, nullptr);
+  LOG(INFO) << "invoked";
+  LOG(INFO) << "total time: "
+            << (get_us(stop_time) - get_us(start_time)) / 1000
+            << " ms";
+
   printf("\n\n=== Post-invoke Interpreter State ===\n");
   // tflite::PrintInterpreterState(interpreter.get());
 

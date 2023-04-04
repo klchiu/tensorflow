@@ -394,13 +394,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     if (builtin_code == kTfLiteBuiltinAdd) {
       //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinAdd\n");
 
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
+    //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
+    //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
+    //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
 
 
       if (NumElements(input_tensor_1) != NumElements(output_tensor) && NumElements(input_tensor_2) != NumElements(output_tensor)) {
-       fprintf(stderr, "[humu]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
+      //  fprintf(stderr, "[humu]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
         return kTfLiteDelegateError;
       }
 
@@ -423,17 +423,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_add3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
+      //  fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
+      //  fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
+      //  fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
+      //  fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
         cfg_tf_add3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_add3: esp_run()\n");
+          esp_run_no_print(cfg_tf_add3, NACC);
+         // fprintf(stderr, "[humu]: tf_add3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -467,17 +467,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_add3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
         cfg_tf_add3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_add3: esp_run()\n");
+          esp_run_no_print(cfg_tf_add3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_add3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -513,17 +513,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_add3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_length = %d\n", tf_add3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_add3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_add3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
         cfg_tf_add3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_add3: esp_run()\n");
+          esp_run_no_print(cfg_tf_add3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_add3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -538,13 +538,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     if (builtin_code == kTfLiteBuiltinSub) {
       //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinSub\n");
 
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
 
 
       if (NumElements(input_tensor_1) != NumElements(output_tensor) && NumElements(input_tensor_2) != NumElements(output_tensor)) {
-       fprintf(stderr, "[humu]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
+       //  fprintf(stderr, "[humu]]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
         return kTfLiteDelegateError;
       }
 
@@ -567,17 +567,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_sub3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_sub3: esp_run()\n");
+          esp_run_no_print(cfg_tf_sub3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_sub3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -611,17 +611,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_sub3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_sub3: esp_run()\n");
+          esp_run_no_print(cfg_tf_sub3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_sub3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -657,17 +657,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_sub3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_length = %d\n", tf_sub3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_sub3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_sub3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_sub3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_sub3: esp_run()\n");
+          esp_run_no_print(cfg_tf_sub3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_sub3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -683,13 +683,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     if (builtin_code == kTfLiteBuiltinMul) {
       //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinMul\n");
 
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
-     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
+     //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult, NumElements(output_tensor) = %d\n", NumElements(output_tensor));
 
 
       if (NumElements(input_tensor_1) != NumElements(output_tensor) && NumElements(input_tensor_2) != NumElements(output_tensor)) {
-       fprintf(stderr, "[humu]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
+       //  fprintf(stderr, "[humu]]: NumElements(input_1): %d, NumElements(input_2): %d, NumElements(output): %d\n",NumElements(input_tensor_1), NumElements(input_tensor_2), NumElements(output_tensor));
         return kTfLiteDelegateError;
       }
 
@@ -712,17 +712,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_mult3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_mult3: esp_run()\n");
+          esp_run_no_print(cfg_tf_mult3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_mult3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -756,17 +756,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_mult3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_mult3: esp_run()\n");
+          esp_run_no_print(cfg_tf_mult3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_mult3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -802,17 +802,17 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_1 = len;
 		    tf_mult3_cfg_000[0].tf_src_dst_offset_2 = len+len;
 
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
-       fprintf(stderr, "[humu]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_length = %d\n", tf_mult3_cfg_000[0].tf_length);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_0 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_0);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_1 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_1);
+       //  fprintf(stderr, "[humu]]: tf_mult3_cfg_000[0].tf_src_dst_offset_2 = %d\n", tf_mult3_cfg_000[0].tf_src_dst_offset_2);
 
         token_t* acc_buf;
         acc_buf = (token_t*)esp_alloc(5000000);
-        cfg_tf_add3[0].hw_buf = acc_buf;
+        cfg_tf_mult3[0].hw_buf = acc_buf;
         for(int i = 0 ;i < num_add_run; i++){
-          esp_run(cfg_tf_add3, NACC);
-         fprintf(stderr, "[humu]: tf_mult3: esp_run()\n");
+          esp_run_no_print(cfg_tf_mult3, NACC);
+         //  fprintf(stderr, "[humu]]: tf_mult3: esp_run()\n");
         }
         esp_free(acc_buf);
 
@@ -827,7 +827,7 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
 
     if (builtin_code == kTfLiteBuiltinFullyConnected) {
-      fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
+      //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
       // void* buf = NULL;
       // esp_dummy(4);
     }
@@ -860,11 +860,13 @@ class XNNPackDelegate : public SimpleDelegateInterface {
                                  TfLiteContext* context) const override {
     // Only supports Add and Sub ops.
     if (
-      // registration->builtin_code != kTfLiteBuiltinAdd &&
-        registration->builtin_code != kTfLiteBuiltinSub &&
-        registration->builtin_code != kTfLiteBuiltinFullyConnected &&
-        registration->builtin_code != kTfLiteBuiltinDepthwiseConv2d &&
-        registration->builtin_code != kTfLiteBuiltinConv2d)
+        registration->builtin_code != kTfLiteBuiltinAdd &&
+        // registration->builtin_code != kTfLiteBuiltinSub &&
+        registration->builtin_code != kTfLiteBuiltinMul &&
+        // registration->builtin_code != kTfLiteBuiltinFullyConnected &&
+        // registration->builtin_code != kTfLiteBuiltinDepthwiseConv2d &&
+        registration->builtin_code != kTfLiteBuiltinConv2d
+        )
       return false;
 
     // This delegate only supports float32 types.
