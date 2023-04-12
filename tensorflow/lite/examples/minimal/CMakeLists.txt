@@ -40,6 +40,13 @@ else()
   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_ESP")
 endif()  # TFLITE_ENABLE_ESP
 
+
+if(ESP_RISCV)
+  add_definitions(-DESP_RISCV)
+  message("[humu]: CMakeLists(minimal) add definition")
+endif()
+
+
 add_subdirectory(
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
   "${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite"
@@ -50,12 +57,21 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(minimal
   minimal.cc
 )
-target_link_libraries(minimal
+
+if(ESP_RISCV)
+  # message("[humu]: CMakeLists(minimal) ESP_RISCV = ON")
+  target_link_libraries(minimal
   tensorflow-lite
   # [humu]: include these static libraries for using ESP APIs
-  ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libmonitors.a
-  ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libesp.a
-  ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libutils.a
-  ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libtest.a
-  ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libcontig.a
-)
+    ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libmonitors.a
+    ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libesp.a
+    ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libutils.a
+    ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libtest.a
+    ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libcontig.a
+  )
+else()
+  # message("[humu]: CMakeLists(minimal) ESP_RISCV = OFF")
+  target_link_libraries(minimal
+  tensorflow-lite
+  )
+endif() # ESP_RISCV MATCHES "ON"

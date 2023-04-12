@@ -80,13 +80,13 @@ int main(int argc, char* argv[]) {
   // Run inference
   printf("\n\n=== [humu]: 1 ===\n");
   struct timeval start_time, stop_time;
-  gettimeofday(&start_time, nullptr);
+  // gettimeofday(&start_time, nullptr);
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
-  gettimeofday(&stop_time, nullptr);
-  LOG(INFO) << "invoked";
-  LOG(INFO) << "total time: "
-            << (get_us(stop_time) - get_us(start_time)) / 1000
-            << " ms";
+  // gettimeofday(&stop_time, nullptr);
+  // LOG(INFO) << "invoked";
+  // LOG(INFO) << "total time: "
+  //           << (get_us(stop_time) - get_us(start_time)) / 1000
+  //           << " ms";
 
   printf("\n\n=== Post-invoke Interpreter State ===\n");
   // tflite::PrintInterpreterState(interpreter.get());
@@ -100,6 +100,13 @@ int main(int argc, char* argv[]) {
   // TODO(user): Insert getting data out code.
   // Note: The buffer of the output tensor with index `i` of type T can
   // be accessed with `T* output = interpreter->typed_output_tensor<T>(i);`
+
+
+#ifdef ESP_RISCV
+  printf("[humu]: minimal.cc: ESP_RISCV=ON\n");
+#else
+  printf("[humu]: minimal.cc: ESP_RISCV=OFF\n");
+#endif
 
   return 0;
 }

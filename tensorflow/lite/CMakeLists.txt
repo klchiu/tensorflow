@@ -454,7 +454,7 @@ endif()
 
 
 # if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
-#   set(RUN_ON_FPGA "ON")
+#   set(ESP_RISCV "ON")
 # endif()
 
 

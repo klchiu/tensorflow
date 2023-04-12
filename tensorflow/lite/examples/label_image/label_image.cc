@@ -575,5 +575,12 @@ printf("[humu]: label_image done 0317\n");
 }  // namespace tflite
 
 int main(int argc, char** argv) {
+
+#ifdef ESP_RISCV
+  printf("[humu]: label_image.cc: ESP_RISCV=ON\n");
+#else
+  printf("[humu]: label_image.cc: ESP_RISCV=OFF\n");
+#endif
+
   return tflite::label_image::Main(argc, argv);
 }

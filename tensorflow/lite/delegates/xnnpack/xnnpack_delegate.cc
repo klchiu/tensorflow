@@ -26,15 +26,15 @@
 #include "tensorflow/lite/util.h"
 
 // [humu]: include this header file for using ESP APIs
-#define __FIXED
-#define BITWIDTH 32
-#include "tensorflow/esp_libs/cfg_tf_add3.h"
-#include "tensorflow/esp_libs/cfg_tf_sub3.h"
-#include "tensorflow/esp_libs/cfg_tf_mult3.h"
+// #define __FIXED
+// #define BITWIDTH 32
+// #include "tensorflow/esp_libs/cfg_tf_add3.h"
+// #include "tensorflow/esp_libs/cfg_tf_sub3.h"
+// #include "tensorflow/esp_libs/cfg_tf_mult3.h"
 
-#include "tensorflow/esp_libs/cfg_conv2d.h"
-#include "tensorflow/esp_libs/conv2d_helper.h"
-#include "tensorflow/esp_libs/esp_api_include.h"
+// #include "tensorflow/esp_libs/cfg_conv2d.h"
+// #include "tensorflow/esp_libs/conv2d_helper.h"
+// #include "tensorflow/esp_libs/esp_api_include.h"
 // [humu]: end for including ESP APIs
 
 namespace tflite {

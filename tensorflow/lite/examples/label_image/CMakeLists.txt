@@ -71,6 +71,13 @@ if(TFLITE_ENABLE_GPU)
   )
 endif()  # TFLITE_ENABLE_GPU
 
+
+if(ESP_RISCV)
+  add_definitions(-DESP_RISCV)
+  message("[humu]: CMakeLists(label_image) add definition")
+endif()
+
+
 add_executable(label_image
   EXCLUDE_FROM_ALL
   ${TFLITE_LABEL_IMAGE_SRCS}
@@ -79,14 +86,23 @@ target_compile_options(label_image
   PRIVATE
     ${TFLITE_LABEL_IMAGE_CC_OPTIONS}
 )
-target_link_libraries(label_image
+
+
+if(ESP_RISCV)
+  message("[humu]: CMakeLists(label_image) ESP_RISCV = ON")
+  target_link_libraries(label_image
   tensorflow-lite
   # [humu]: include these static libraries for using ESP APIs
-  # if(RUN_ON_FPGA)
     ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libmonitors.a
     ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libesp.a
     ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libutils.a
     ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libtest.a
     ${TENSORFLOW_SOURCE_DIR}/tensorflow/esp_libs/libcontig.a
-  # endif() # RUN_ON_FPGA MATCHES "ON"
-)
+  )
+else()
+  message("[humu]: CMakeLists(label_image) ESP_RISCV = OFF")
+  target_link_libraries(label_image
+  tensorflow-lite
+  )
+endif() # ESP_RISCV MATCHES "ON"
+  
