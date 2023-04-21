@@ -25,17 +25,22 @@
 #include "tensorflow/lite/minimal_logging.h"
 #include "tensorflow/lite/util.h"
 
-// [humu]: include this header file for using ESP APIs
-// #define __FIXED
-// #define BITWIDTH 32
-// #include "tensorflow/esp_libs/cfg_tf_add3.h"
-// #include "tensorflow/esp_libs/cfg_tf_sub3.h"
-// #include "tensorflow/esp_libs/cfg_tf_mult3.h"
+// #ifdef ESP_RISCV
+ // [humu]: include this header file for using ESP APIs
+#define __FIXED
+#define BITWIDTH 32
+#include "tensorflow/esp_libs/cfg_tf_add3.h"
+#include "tensorflow/esp_libs/cfg_tf_sub3.h"
+#include "tensorflow/esp_libs/cfg_tf_mult3.h"
 
-// #include "tensorflow/esp_libs/cfg_conv2d.h"
-// #include "tensorflow/esp_libs/conv2d_helper.h"
-// #include "tensorflow/esp_libs/esp_api_include.h"
+#include "tensorflow/esp_libs/cfg_gemm.h"
+#include "tensorflow/esp_libs/gemm_helper.h"
+
+#include "tensorflow/esp_libs/cfg_conv2d.h"
+#include "tensorflow/esp_libs/conv2d_helper.h"
+#include "tensorflow/esp_libs/esp_api_include.h"
 // [humu]: end for including ESP APIs
+// #endif  // ESP_RISCV
 
 namespace tflite {
 namespace {
@@ -319,10 +324,14 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     if(output_height == 1 && output_width == 1 && input_height == 1 && input_width == 1){
           do_conv2d_sw = 1;
       }
+      if(filter_height != filter_width){
+        do_conv2d_sw = 1;
+      }
+
 
     ///*
     if(do_conv2d_sw){
-       fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
+     //  fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
 
 
     }
@@ -445,13 +454,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         if (NumElements(input_tensor_2) == 1) {
            
           // for (int i = 0; i < NumElements(input_tensor_1); i++) {
-          //  fprintf(stderr, "[humu]: debug 0, %d\n", i);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
+            // fprintf(stderr, "[humu]: debug 0, %d\n", i);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
           //   float temp = input_1[i] + input_2[0];
           //   // output[i] = input_1[i] + input_2[0];
-          //  fprintf(stderr, "[humu]: debug 1, %f\n", temp);
+            // fprintf(stderr, "[humu]: debug 1, %f\n", temp);
 
           // }
 
@@ -496,7 +505,7 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         //   // output[i] = input_1[i] + input_2[i];
         //   // float temp = input_1[i] + input_2[i];
         //   float temp = i;
-        //  fprintf(stderr, "[humu]: debug 2, %f\n", temp);
+          // fprintf(stderr, "[humu]: debug 2, %f\n", temp);
         // }
 
 
@@ -589,13 +598,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         if (NumElements(input_tensor_2) == 1) {
            
           // for (int i = 0; i < NumElements(input_tensor_1); i++) {
-          //  fprintf(stderr, "[humu]: debug 0, %d\n", i);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
+            // fprintf(stderr, "[humu]: debug 0, %d\n", i);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
           //   float temp = input_1[i] + input_2[0];
           //   // output[i] = input_1[i] + input_2[0];
-          //  fprintf(stderr, "[humu]: debug 1, %f\n", temp);
+            // fprintf(stderr, "[humu]: debug 1, %f\n", temp);
 
           // }
 
@@ -636,11 +645,11 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
       if (NumElements(input_tensor_1) == NumElements(input_tensor_2)) {
       // NumElements(input_tensor_1) == NumElements(input_tensor_2) == NumElements(output_tensor)
         // for (int i = 0; i < NumElements(input_tensor_1); ++i) {
-        //  fprintf(stderr, "[humu]: debug 2, 0\n");
+          // fprintf(stderr, "[humu]: debug 2, 0\n");
         //   // output[i] = input_1[i] + input_2[i];
         //   // float temp = input_1[i] + input_2[i];
         //   float temp = i;
-        //  fprintf(stderr, "[humu]: debug 2, %f\n", temp);
+          // fprintf(stderr, "[humu]: debug 2, %f\n", temp);
         // }
 
 
@@ -734,13 +743,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         if (NumElements(input_tensor_2) == 1) {
            
           // for (int i = 0; i < NumElements(input_tensor_1); i++) {
-          //  fprintf(stderr, "[humu]: debug 0, %d\n", i);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
-          //  fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
+            // fprintf(stderr, "[humu]: debug 0, %d\n", i);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_1[i]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", input_2[0]);
+            // fprintf(stderr, "[humu]: debug ff, %f\n", output[i]);
           //   float temp = input_1[i] + input_2[0];
           //   // output[i] = input_1[i] + input_2[0];
-          //  fprintf(stderr, "[humu]: debug 1, %f\n", temp);
+            // fprintf(stderr, "[humu]: debug 1, %f\n", temp);
 
           // }
 
@@ -781,11 +790,11 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
       if (NumElements(input_tensor_1) == NumElements(input_tensor_2)) {
       // NumElements(input_tensor_1) == NumElements(input_tensor_2) == NumElements(output_tensor)
         // for (int i = 0; i < NumElements(input_tensor_1); ++i) {
-        //  fprintf(stderr, "[humu]: debug 2, 0\n");
+          // fprintf(stderr, "[humu]: debug 2, 0\n");
         //   // output[i] = input_1[i] + input_2[i];
         //   // float temp = input_1[i] + input_2[i];
         //   float temp = i;
-        //  fprintf(stderr, "[humu]: debug 2, %f\n", temp);
+          // fprintf(stderr, "[humu]: debug 2, %f\n", temp);
         // }
 
 
@@ -827,10 +836,72 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
 
     if (builtin_code == kTfLiteBuiltinFullyConnected) {
-      //  fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
+      // fprintf(stderr, "[humu]]: XNNPACK-ESP ComputeResult: kTfLiteBuiltinFullyConnected\n");
       // void* buf = NULL;
       // esp_dummy(4);
+
+
+
+
+
+
+    int test, n_tests, start_test = 1;
+    unsigned in_len;
+    unsigned in1_len;
+    unsigned out_len;
+    unsigned in_size;
+    unsigned out_size;
+    unsigned size;
+    
+    int32_t do_relu  [30] = {   0,  0,  0,    0,   0,  0,   0,   0,   0,    0,
+				       0,  0,  0,    0,   0,  0,   0,   0,   0,    0,
+				       0,  0,  0,    0,   0,  0,   0,   0,   0,    0};
+
+    int32_t transpose[30] = {   1,  1,  0,    1,   1,  0,   1,   1,   0,    1,
+				       1,  1,  0,    0,   1,  1,   1,   1,   1,    1,
+				       0,  0,  0,    0,   1,  0,   0,   1,   1,    1};
+
+    int32_t ninputs  [30] = {   2, 32,  4,    1,   8,  1,   1, 128,   1,    1,
+				       1,  2,  1,    1,   1,  1,   4,   8,   2,    2,
+				       2,  2,  2,    1, 128,  1,   4,   2,   2,    2};
+
+    int32_t d3       [30] = {   8,  8,  8,   32,  32, 32, 128, 128, 128,    1,
+				       1, 20,  2,    2,  64, 64,  11,  18,  18,   21,
+				      11, 18, 18,   21, 128,  8,   8,   8,   8,   21};
+
+    int32_t d2       [30] = {   8,  8,  8,   32,  32, 32, 128, 128, 128, 2048,
+				    2048, 16, 64, 2048,   1,  2,  246,  25,  14,   14,
+				      26, 25, 14,   14, 128,  8,   8,   8,   8,   14};
+
+    int32_t d1       [30] = {   8,  8,  8,   32,  32, 32, 128, 128, 128,    1,
+				       8,  1, 10,    1,  64, 64,  21,  22,  31,   22,
+				       21,22, 31,   22, 128,  8,   8,   8,   8,   11};
+    
+    token_t* acc_buf;
+    acc_buf = (token_t *) esp_alloc(50000000);
+    cfg_gemm[0].hw_buf = acc_buf;
+
+
+    n_tests = 10;
+    for (test = start_test - 1; test < n_tests + start_test - 1; ++test) {
+
+	    printf("\n\n-------------------\n");
+	    printf("TEST #%d\n", test + 1);
+
+	    // calculate test parameters
+	    gemm_init_parameters(test,
+			do_relu[test], transpose[test], ninputs[test], d3[test], d2[test], d1[test],
+			&in_len, &in1_len, &out_len, &in_size, &out_size, &size);
+
+	    printf("  Start accelerator execution\n");
+	    esp_run(cfg_gemm, 1);
+	    printf("  Completed accelerator execution\n");
     }
+
+
+    esp_free(acc_buf);
+    }
+
 
     return kTfLiteOk;
   }
@@ -860,12 +931,12 @@ class XNNPackDelegate : public SimpleDelegateInterface {
                                  TfLiteContext* context) const override {
     // Only supports Add and Sub ops.
     if (
-        registration->builtin_code != kTfLiteBuiltinAdd &&
+        // registration->builtin_code != kTfLiteBuiltinAdd
         // registration->builtin_code != kTfLiteBuiltinSub &&
-        registration->builtin_code != kTfLiteBuiltinMul &&
-        // registration->builtin_code != kTfLiteBuiltinFullyConnected &&
+        // registration->builtin_code != kTfLiteBuiltinMul
+        registration->builtin_code != kTfLiteBuiltinFullyConnected
         // registration->builtin_code != kTfLiteBuiltinDepthwiseConv2d &&
-        registration->builtin_code != kTfLiteBuiltinConv2d
+        // registration->builtin_code != kTfLiteBuiltinConv2d
         )
       return false;
 
