@@ -13,7 +13,7 @@
 
 // [humu]: helper functions
 
-static void init_parameters(int test, int32_t n_channels, int32_t feature_map_height, int32_t feature_map_width,
+static void conv2d_init_parameters(int test, int32_t n_channels, int32_t feature_map_height, int32_t feature_map_width,
                             int32_t n_filters, int32_t filter_dim, int32_t is_padded, int32_t stride, int32_t do_relu,
                             int32_t pool_type, int32_t batch_size, unsigned *in_len, unsigned *weights_len,
                             unsigned *bias_len, unsigned *out_len, unsigned *in_size, unsigned *weights_size,
