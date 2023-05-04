@@ -271,6 +271,10 @@ inline void FullyConnected(
     const float* weights_data, const RuntimeShape& bias_shape,
     const float* optional_bias_data, const RuntimeShape& output_shape,
     float* output_data, CpuBackendContext* cpu_backend_context) {
+
+      printf("[humu]: optimized_ops.h, FullyConnected(), check 0\n");
+
+
   ruy::profiler::ScopeLabel label("FullyConnected");
   const int dims_count = weights_shape.DimensionsCount();
   const int input_rows = weights_shape.Dims(dims_count - 1);
@@ -296,6 +300,30 @@ inline void FullyConnected(
   gemm_params.bias = optional_bias_data;
   gemm_params.clamp_min = params.float_activation_min;
   gemm_params.clamp_max = params.float_activation_max;
+
+  printf("[humu]: optimized_ops.h, FullyConnected(), dims_count : %d\n", dims_count);
+  printf("[humu]: optimized_ops.h, FullyConnected(), input_rows : %d\n", input_rows);
+
+  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.order : %d\n", lhs_params.order);
+  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cols : %d\n", lhs_params.cols);
+  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.rows : %d\n", lhs_params.rows);
+  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cache_policy : %d\n", lhs_params.cache_policy);
+
+  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.order : %d\n", rhs_params.order);
+  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cols : %d\n", rhs_params.cols);
+  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.rows : %d\n", rhs_params.rows);
+  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cache_policy : %d\n", rhs_params.cache_policy);
+
+  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.order : %d\n", dst_params.order);
+  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.cols : %d\n", dst_params.cols);
+  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.rows : %d\n", dst_params.rows);
+
+
+  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.bias : %d\n", gemm_params.bias);
+  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_min : %d\n", gemm_params.clamp_min);
+  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_max : %d\n", gemm_params.clamp_max);
+
+
   cpu_backend_gemm::Gemm(lhs_params, weights_data, rhs_params, input_data,
                          dst_params, output_data, gemm_params,
                          cpu_backend_context);
@@ -307,6 +335,9 @@ inline void FullyConnected(
     const uint8* filter_data, const RuntimeShape& bias_shape,
     const int32* bias_data, const RuntimeShape& output_shape,
     uint8* output_data, CpuBackendContext* cpu_backend_context) {
+
+            printf("[humu]: optimized_ops.h, FullyConnected(), check 1\n");
+
   ruy::profiler::ScopeLabel label("FullyConnected/8bit");
   const int32 input_offset = params.input_offset;
   const int32 filter_offset = params.weights_offset;
@@ -370,6 +401,10 @@ inline void FullyConnected(
     const uint8* filter_data, const RuntimeShape& bias_shape,
     const int32* bias_data_int32, const RuntimeShape& output_shape,
     int16* output_data, CpuBackendContext* cpu_backend_context) {
+
+      printf("[humu]: optimized_ops.h, FullyConnected(), check 2\n");
+
+
   ruy::profiler::ScopeLabel label("FullyConnected/Uint8Int16");
   const int32 input_offset = params.input_offset;
   const int32 filter_offset = params.weights_offset;

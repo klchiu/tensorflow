@@ -131,6 +131,14 @@ else()
   list(APPEND TEST_FRAMEWORK_OPTIONS "-DTFLITE_WITHOUT_ESP")
 endif()
 
+if(ESP_RISCV)
+  add_definitions(-DESP_RISCV)
+  message("[humu]: CMakeLists(lite/kernels) add definition: ESP_RISCV")
+else()
+  message("[humu]: CMakeLists(lite/kernels) add definition: ESP_RISCV -- NO!")
+endif()
+
+
 # Base library to be later linked with the gtest OR gtest_main library
 add_library(tensorflow-lite-test-base ${TEST_FRAMEWORK_SRC})
 target_link_libraries(tensorflow-lite-test-base

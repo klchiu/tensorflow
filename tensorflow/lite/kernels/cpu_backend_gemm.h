@@ -118,6 +118,10 @@ void Gemm(const MatrixParams<LhsScalar>& lhs_params, const LhsScalar* lhs_data,
           const MatrixParams<DstScalar>& dst_params, DstScalar* dst_data,
           const GemmParams<AccumScalar, DstScalar, quantization_flavor>& params,
           CpuBackendContext* context) {
+
+  printf("[humu]: cpu_backend_gemm.h, Gemm()\n");
+
+
   ruy::profiler::ScopeLabel label("cpu_backend_gemm::Gemm");
   ValidateParams(lhs_params, rhs_params, dst_params, params);
   if (!IsValidGemm(lhs_params, rhs_params, dst_params)) {
