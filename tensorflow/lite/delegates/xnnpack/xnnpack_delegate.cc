@@ -244,12 +244,6 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
   TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) override {
     // Evaluate the delegated graph.
     // Here we loop over all the delegated nodes.
-    // We know that all the nodes are either ADD or SUB operations and the
-    // number of nodes equals ''inputs_.size()'' and inputs[i] is a list of
-    // tensor indices for inputs to node ''i'', while outputs_[i] is the list of
-    // outputs for node
-    // ''i''. Note, that it is intentional we have simple implementation as this
-    // is for demonstration.
     
     fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), inputs_.size() = %d\n", inputs_.size());
 
@@ -936,10 +930,10 @@ class XNNPackDelegate : public SimpleDelegateInterface {
   explicit XNNPackDelegate(const TfLiteXNNPackDelegateOptions& options) : options_(options) {}
   bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration, const TfLiteNode* node, TfLiteContext* context) const override {
     if (
-        // registration->builtin_code != kTfLiteBuiltinAdd &&
+        registration->builtin_code != kTfLiteBuiltinAdd
         // registration->builtin_code != kTfLiteBuiltinSub &&
         // registration->builtin_code != kTfLiteBuiltinMul
-        registration->builtin_code != kTfLiteBuiltinFullyConnected
+        // registration->builtin_code != kTfLiteBuiltinFullyConnected
         // registration->builtin_code != kTfLiteBuiltinDepthwiseConv2d &&
         // registration->builtin_code != kTfLiteBuiltinConv2d
         // [humu]: place holder

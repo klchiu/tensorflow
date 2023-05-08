@@ -63,17 +63,17 @@ static void conv2d_init_parameters(int test, int32_t n_channels, int32_t feature
     conv2d_cfg_000[0].batch_size         = batch_size;
 
     // print test info
-    printf("  Prepare test %d parameters\n", test);
-    printf("    .n_channels = %d\n", n_channels);
-    printf("    .feature_map_height = %d\n", feature_map_height);
-    printf("    .feature_map_width = %d\n", feature_map_width);
-    printf("    .n_filters = %d\n", n_filters);
-    printf("    .filter_dim = %d\n", filter_dim);
-    printf("    .is_padded = %d\n", is_padded);
-    printf("    .stride = %d\n", stride);
-    printf("    .do_relu = %d\n", do_relu);
-    printf("    .pool_type = %d\n", pool_type);
-    printf("    .batch_size = %d\n", batch_size);
+    // printf("  Prepare test %d parameters\n", test);
+    // printf("    .n_channels = %d\n", n_channels);
+    // printf("    .feature_map_height = %d\n", feature_map_height);
+    // printf("    .feature_map_width = %d\n", feature_map_width);
+    // printf("    .n_filters = %d\n", n_filters);
+    // printf("    .filter_dim = %d\n", filter_dim);
+    // printf("    .is_padded = %d\n", is_padded);
+    // printf("    .stride = %d\n", stride);
+    // printf("    .do_relu = %d\n", do_relu);
+    // printf("    .pool_type = %d\n", pool_type);
+    // printf("    .batch_size = %d\n", batch_size);
 }
 
 

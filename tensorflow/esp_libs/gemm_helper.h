@@ -50,16 +50,16 @@ static void gemm_init_parameters(int test, int32_t do_relu, int32_t transpose, i
     gemm_cfg_000[0].st_offset = st_offset;
 
     // print test info
-    printf("  Prepare test %d parameters\n", test);
-    printf("    .do_relu = %d\n", do_relu);
-    printf("    .transpose = %d\n", transpose);
-    printf("    .ninputs = %d\n", ninputs);
-    printf("    .d3 = %d\n", d3);
-    printf("    .d2 = %d\n", d2);
-    printf("    .d1 = %d\n", d1);
-    printf("    .st_offset = %d\n", st_offset);
-    printf("    .ld_offset1 = %d\n", ld_offset1);
-    printf("    .ld_offset2 = %d\n", ld_offset2);
+    // printf("  Prepare test %d parameters\n", test);
+    // printf("    .do_relu = %d\n", do_relu);
+    // printf("    .transpose = %d\n", transpose);
+    // printf("    .ninputs = %d\n", ninputs);
+    // printf("    .d3 = %d\n", d3);
+    // printf("    .d2 = %d\n", d2);
+    // printf("    .d1 = %d\n", d1);
+    // printf("    .st_offset = %d\n", st_offset);
+    // printf("    .ld_offset1 = %d\n", ld_offset1);
+    // printf("    .ld_offset2 = %d\n", ld_offset2);
 }
 
 
