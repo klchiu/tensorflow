@@ -308,6 +308,11 @@ void RunInference(Settings* settings,
                     image_height, image_width, image_channels, wanted_height,
                     wanted_width, wanted_channels, settings);
       break;
+    case kTfLiteInt32:
+      resize<int32_t>(interpreter->typed_tensor<int32_t>(input), in.data(),
+                      image_height, image_width, image_channels, wanted_height,
+                      wanted_width, wanted_channels, settings);
+      break;
     case kTfLiteInt8:
       resize<int8_t>(interpreter->typed_tensor<int8_t>(input), in.data(),
                      image_height, image_width, image_channels, wanted_height,
@@ -382,6 +387,11 @@ void RunInference(Settings* settings,
   switch (interpreter->tensor(output)->type) {
     case kTfLiteFloat32:
       get_top_n<float>(interpreter->typed_output_tensor<float>(0), output_size,
+                       settings->number_of_results, threshold, &top_results,
+                       settings->input_type);
+      break;
+    case kTfLiteInt32:
+      get_top_n<int32_t>(interpreter->typed_output_tensor<int32_t>(0), output_size,
                        settings->number_of_results, threshold, &top_results,
                        settings->input_type);
       break;
