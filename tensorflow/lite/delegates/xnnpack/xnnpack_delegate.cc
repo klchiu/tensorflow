@@ -35,65 +35,22 @@
 #include "tensorflow/esp_libs/cfg_tf_mult3.h"
 #include "tensorflow/esp_libs/cfg_tf_sub3.h"
 #include "tensorflow/esp_libs/conv2d_helper.h"
+#include "tensorflow/esp_libs/esp_acc_prints.h"
 #include "tensorflow/esp_libs/esp_api_include.h"
 #include "tensorflow/esp_libs/gemm_helper.h"
 // [humu]: end for including ESP APIs
 // #endif  // ESP_RISCV
 
-void print_conv2d_cfg(esp_thread_info_t* thread_cfg, conv2d_stratus_access* cfg) {
-  fprintf(stderr, "---------------- conv2d ACC Config ----------------\n");
-  fprintf(stderr, "    devname =            %s\n", thread_cfg->devname);
-  fprintf(stderr, "    n_channels =         %d\n", cfg->n_channels);
-  fprintf(stderr, "    feature_map_height = %d\n", cfg->feature_map_height);
-  fprintf(stderr, "    feature_map_width =  %d\n", cfg->feature_map_width);
-  fprintf(stderr, "    n_filters =          %d\n", cfg->n_filters);
-  fprintf(stderr, "    filter_dim =         %d\n", cfg->filter_dim);
-  fprintf(stderr, "    is_padded =          %d\n", cfg->is_padded);
-  fprintf(stderr, "    stride =             %d\n", cfg->stride);
-  fprintf(stderr, "    do_relu =            %d\n", cfg->do_relu);
-  fprintf(stderr, "    pool_type =          %d\n", cfg->pool_type);
-  fprintf(stderr, "    batch_size =         %d\n", cfg->batch_size);
+float ActivationFunctionWithMinMax(float total, int output_activation_min, int output_activation_max) { return total; }
+
+void init_array(float* array, int size) {
+  srand(time(NULL));
+  for (int i = 0; i < size; i++) array[i] = 0.1 * (rand() % 10);
 }
 
-void print_gemm_cfg(esp_thread_info_t* thread_cfg, gemm_stratus_access* cfg) {
-  fprintf(stderr, "---------------- gemm ACC Config ----------------\n");
-  fprintf(stderr, "    devname =            %s\n", thread_cfg->devname);
-  fprintf(stderr, "    do_relu =            %d\n", cfg->do_relu);
-  fprintf(stderr, "    transpose =          %d\n", cfg->transpose);
-  fprintf(stderr, "    ninputs =            %d\n", cfg->ninputs);
-  fprintf(stderr, "    d3 =                 %d\n", cfg->d3);
-  fprintf(stderr, "    d2 =                 %d\n", cfg->d2);
-  fprintf(stderr, "    d1 =                 %d\n", cfg->d1);
-  fprintf(stderr, "    st_offset =          %d\n", cfg->st_offset);
-  fprintf(stderr, "    ld_offset1 =         %d\n", cfg->ld_offset1);
-  fprintf(stderr, "    ld_offset2 =         %d\n", cfg->ld_offset2);
-}
-
-void print_tf_add3_cfg(esp_thread_info_t* thread_cfg, tf_add3_stratus_access* cfg) {
-  fprintf(stderr, "---------------- tf_add3 ACC Config ----------------\n");
-  fprintf(stderr, "    devname =              %s\n", thread_cfg->devname);
-  fprintf(stderr, "    tf_length =            %d\n", cfg->tf_length);
-  fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
-  fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
-  fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
-}
-
-void print_tf_sub3_cfg(esp_thread_info_t* thread_cfg, tf_sub3_stratus_access* cfg) {
-  fprintf(stderr, "---------------- tf_sub3 ACC Config ----------------\n");
-  fprintf(stderr, "    devname =              %s\n", thread_cfg->devname);
-  fprintf(stderr, "    tf_length =            %d\n", cfg->tf_length);
-  fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
-  fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
-  fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
-}
-
-void print_tf_mult3_cfg(esp_thread_info_t* thread_cfg, tf_mult3_stratus_access* cfg) {
-  fprintf(stderr, "---------------- tf_mult3 ACC Config ----------------\n");
-  fprintf(stderr, "    devname =              %s\n", thread_cfg->devname);
-  fprintf(stderr, "    tf_length =            %d\n", cfg->tf_length);
-  fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
-  fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
-  fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
+void init_array_0(float* array, int size) {
+  srand(time(NULL));
+  for (int i = 0; i < size; i++) array[i] = 0.0;
 }
 
 namespace tflite {
@@ -201,13 +158,16 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
   TfLiteStatus Init(TfLiteContext* context, const TfLiteDelegateParams* params) override {
     fprintf(stderr, "[humu]: XNNPACK-ESP Init()\n");
 
+    counter_Eval = 0;
+
     // Save index to all nodes which are part of this delegate.
     inputs_.resize(params->nodes_to_replace->size);
     outputs_.resize(params->nodes_to_replace->size);
     builtin_code_.resize(params->nodes_to_replace->size);
 
     fprintf(stderr, "[humu]: XNNPACK-ESP Init(), inputs_.size = %d\n", params->nodes_to_replace->size);
-    
+    fprintf(stderr, "[humu]: XNNPACK-ESP Init(), outputs_.size = %d\n", params->nodes_to_replace->size);
+    fprintf(stderr, "[humu]: XNNPACK-ESP Init(), builtin_code_.size = %d\n", params->nodes_to_replace->size);
 
     for (int i = 0; i < params->nodes_to_replace->size; ++i) {
       fprintf(stderr, "[humu]: XNNPACK-ESP Init(), loop i = %d\n", i);
@@ -218,10 +178,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
       TfLiteRegistration* delegated_node_registration = nullptr;
       TF_LITE_ENSURE_EQ(context, context->GetNodeAndRegistration(context, node_index, &delegated_node, &delegated_node_registration),
                         kTfLiteOk);
+      // [humu]: only 2 inputs for add and sub, how about the others??
       inputs_[i].push_back(delegated_node->inputs->data[0]);
       inputs_[i].push_back(delegated_node->inputs->data[1]);
       outputs_[i].push_back(delegated_node->outputs->data[0]);
       builtin_code_[i] = delegated_node_registration->builtin_code;
+
+      fprintf(stderr, "[humu]: XNNPACK-ESP Init(), loop i = %d, builtin_code = %d\n", i, builtin_code_[i]);
     }
 
     return kTfLiteOk;
@@ -237,39 +200,56 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
   TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) override {
     // return !options_.error_during_prepare ? kTfLiteOk : kTfLiteError;
-     fprintf(stderr, "[humu]: XNNPACK-ESP Prepare()\n");
+    fprintf(stderr, "[humu]: XNNPACK-ESP Prepare()\n");
     return kTfLiteOk;
   }
 
   TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) override {
-    // Evaluate the delegated graph.
-    // Here we loop over all the delegated nodes.
-    
-    fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), inputs_.size() = %d\n", inputs_.size());
+    // Evaluate the delegated graph. Here we loop over all the delegated nodes.
 
-    auto* params = reinterpret_cast<TfLiteConvParams*>(node->builtin_data);
-    // OpData* data = reinterpret_cast<OpData*>(node->user_data);
+    fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), inputs_.size() = %d, counter_Eval = %d\n", inputs_.size(), counter_Eval);
+    TfLiteStatus ret = kTfLiteOk;
 
-    for (int i = 0; i < inputs_.size(); ++i) {
-      // Get the node input tensors.
-      // Add/Sub operation accepts 2 inputs.
-      auto& input_tensor_1 = context->tensors[inputs_[i][0]];
-      auto& input_tensor_2 = context->tensors[inputs_[i][1]];
-      auto& output_tensor = context->tensors[outputs_[i][0]];
+    if (counter_Eval == 0) {
+      counter_Eval += 1;
 
-      //  fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), builtin_code = %d\n", builtin_code_[i]);
+      auto* params = reinterpret_cast<TfLiteConvParams*>(node->builtin_data);
+      // OpData* data = reinterpret_cast<OpData*>(node->user_data);
 
-      if (builtin_code_[i] == kTfLiteBuiltinConv2d) {
-        doConv2dAcc(context, node);
-      } else if (builtin_code_[i] == kTfLiteBuiltinDepthwiseConv2d) {
-        doConv2dAcc(context, node);
-      } else if (builtin_code_[i] == kTfLiteBuiltinFullyConnected) {
-        doGemmAcc(context, node);
-      } else {
-        TF_LITE_ENSURE_EQ(context, ComputeResult(context, builtin_code_[i], &input_tensor_1, &input_tensor_2, &output_tensor), kTfLiteOk);
+      for (int i = 0; i < builtin_code_.size(); ++i) {
+        // Get the node input tensors.
+        // Add/Sub operation accepts 2 inputs.
+        auto& input_tensor_1 = context->tensors[inputs_[i][0]];
+        auto& input_tensor_2 = context->tensors[inputs_[i][1]];
+        auto& output_tensor = context->tensors[outputs_[i][0]];
+
+        //  fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), builtin_code = %d\n", builtin_code_[i]);
+
+        if (builtin_code_[i] == kTfLiteBuiltinConv2d) {
+          ret = doConv2dAcc(context, node);
+        }
+        if (builtin_code_[i] == kTfLiteBuiltinDepthwiseConv2d) {
+          ret = doConv2dAcc(context, node);
+        }
+        if (builtin_code_[i] == kTfLiteBuiltinFullyConnected) {
+          // fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), done 1 doAcc, i = %d\n", i);
+          // ret = doGemmAcc(context, node);
+          ret = doFineGrainedFC(context, node);
+        }
+        if (builtin_code_[i] == kTfLiteBuiltinAdd) {
+          ret = ComputeResult(context, builtin_code_[i], &input_tensor_1, &input_tensor_2, &output_tensor);
+        }
+        if (builtin_code_[i] == kTfLiteBuiltinSub) {
+          ret = ComputeResult(context, builtin_code_[i], &input_tensor_1, &input_tensor_2, &output_tensor);
+        }
+        if (builtin_code_[i] == kTfLiteBuiltinMul) {
+          ret = ComputeResult(context, builtin_code_[i], &input_tensor_1, &input_tensor_2, &output_tensor);
+        }
+
+        // fprintf(stderr, "[humu]: XNNPACK-ESP Eval(), done 1 doAcc, i = %d\n", i);
       }
     }
-    return kTfLiteOk;
+    return ret;
 
     // return !options_.error_during_invoke ? kTfLiteOk : kTfLiteError;
   }
@@ -341,6 +321,12 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
     bool do_conv2d_sw = (filter_height == 1 && filter_width == 1 && input_height == 1 && input_width == 1);
 
+    int gops = filter_height*filter_width*input_depth*input_height*input_width*input_depth;
+    if(gops < 16384){
+            fprintf(stderr, "[humu]: doConv2dAcc: gops = %d\n", gops);
+      do_conv2d_sw = 1;
+    }
+
     if (output_height == 1 && output_width == 1 && input_height == 1 && input_width == 1) {
       do_conv2d_sw = 1;
     }
@@ -350,10 +336,10 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
     ///*
     if (do_conv2d_sw) {
-       fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
+      fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
 
     } else {  // !do_conv2d_sw
-       fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
+      fprintf(stderr, "[humu]: doConv2dAcc: do_conv2d_sw = %d\n", do_conv2d_sw);
 
       // set ACC parameters
       conv2d_cfg_000[0].n_channels = output_depth;
@@ -409,13 +395,15 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     TF_LITE_ENSURE_OK(context, GetOutputSafe(context, node, kOutputTensor, &output));
     // Do nothing if expected output is empty.
     if (NumElements(output) == 0) {
+      fprintf(stderr, "[humu]: ================== doGemmAcc: NumElements(output) == 0\n");
       return kTfLiteOk;
     }
 
-    if (filter->dims->data[1] == 0) {
-      memset(output->data.data, 0, output->bytes);
-      return kTfLiteOk;
-    }
+    // if (filter->dims->data[1] == 0) {
+    //   fprintf(stderr, "[humu]: ================== doGemmAcc: filter->dims->data[1] == 0\n");
+    //   memset(output->data.data, 0, output->bytes);
+    //   return kTfLiteOk;
+    // }
 
     RuntimeShape input_shape = GetTensorShape(input);
     RuntimeShape weights_shape = GetTensorShape(filter);
@@ -458,6 +446,15 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     unsigned out_size;
     unsigned size;
 
+    if (rhs_params_cols == 0 || lhs_params_cols == 0 || lhs_params_rows == 0) {
+      printf("  config error!!! \n");
+      printf("      rhs_params_cols = %d\n", rhs_params_cols);
+      printf("      lhs_params_cols = %d\n", lhs_params_cols);
+      printf("      lhs_params_rows = %d\n", lhs_params_rows);
+      return kTfLiteOk;
+      // return kTfLiteError;
+    }
+
     token_t* acc_buf;
     acc_buf = (token_t*)esp_alloc(50000000);
     cfg_gemm[0].hw_buf = acc_buf;
@@ -467,7 +464,6 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     // calculate test parameters
     gemm_init_parameters(0, 0, 0, 1, rhs_params_cols, lhs_params_cols, lhs_params_rows, &in_len, &in1_len, &out_len, &in_size, &out_size,
                          &size);
-
 
     print_gemm_cfg(&cfg_gemm[0], &gemm_cfg_000[0]);
 
@@ -482,16 +478,372 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
     return kTfLiteOk;
   }
 
+  TfLiteStatus doFineGrainedFC(TfLiteContext* context, TfLiteNode* node) {
+    fprintf(stderr, "[humu]: ================== doFineGrainedFC: \n");
+
+    const TfLiteTensor* tensors = context->tensors;
+    const TfLiteConvParams* conv_params = static_cast<const TfLiteConvParams*>(node->builtin_data);
+
+    // [humu]: the parameters are wrong (output and input tensors have to switch???)
+    TfLiteTensor* output;
+    TF_LITE_ENSURE_OK(context, GetOutputSafe(context, node, 0, &output));
+    const TfLiteTensor* input;
+    TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, 0, &input));
+    const TfLiteTensor* filter;
+    TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, 1, &filter));
+
+    ConvParams params;
+    params.padding_type = PaddingType::kSame;
+    // params.padding_values.width = data->padding.width;
+    // params.padding_values.height = data->padding.height;
+    params.stride_width = params.stride_width;
+    params.stride_height = params.stride_height;
+    // params.dilation_width_factor = params->dilation_width_factor;
+    // params.dilation_height_factor = params->dilation_height_factor;
+    // params.float_activation_min = output_activation_min;
+    // params.float_activation_max = output_activation_max;
+
+    const RuntimeShape& input_shape = GetTensorShape(input);
+    const RuntimeShape& filter_shape = GetTensorShape(filter);
+    const RuntimeShape& output_shape = GetTensorShape(output);
+
+    // setup in multithreaded_conv.h Conv()
+    const int stride_width = params.stride_width;
+    const int stride_height = params.stride_height;
+    const PaddingType padding = params.padding_type;
+    const int pad_width = params.padding_values.width;
+    const int pad_height = params.padding_values.height;
+    const float output_activation_min = params.float_activation_min;
+    const float output_activation_max = params.float_activation_max;
+
+    const int batches = MatchingDim(input_shape, 0, output_shape, 0);
+    const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
+    const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
+    const int input_height = input_shape.Dims(1);
+    const int input_width = input_shape.Dims(2);
+    const int filter_height = filter_shape.Dims(1);
+    const int filter_width = filter_shape.Dims(2);
+    const int output_height = output_shape.Dims(1);
+    const int output_width = output_shape.Dims(2);
+
+    // int batches = 100;
+    // int output_depth = 100;
+    int accum_depth = input_depth;  // 50;
+    float input_data[batches * accum_depth];
+    float weights_data[output_depth * accum_depth];
+    float bias_data[output_depth];
+    float output_data[batches * output_depth], total_1[batches * output_depth];
+    float output_data_2[batches * output_depth];
+    float output_data_3[batches * output_depth];
+    float output_data_4[batches * output_depth];
+    // int output_activation_min=0, output_activation_max=0;
+    init_array(input_data, batches * accum_depth);
+    init_array(weights_data, output_depth * accum_depth);
+    init_array(bias_data, output_depth);
+    init_array_0(output_data, batches * output_depth);
+    init_array_0(output_data_2, batches * output_depth);
+    init_array_0(output_data_3, batches * output_depth);
+    init_array_0(output_data_4, batches * output_depth);
+    // int bias_data = 1;
+    int print_all = 0;
+    int errors = 0;
+
+    // 1 - original
+    // for (int b = 0; b < batches; ++b) {
+    //   for (int out_c = 0; out_c < output_depth; ++out_c) {
+    //     float total = 0.f;
+    //     for (int d = 0; d < accum_depth; ++d) {
+    //       total += input_data[b * accum_depth + d] * weights_data[out_c * accum_depth + d];
+    //     }
+    //     float bias_value = 0.0f;
+    //     if (bias_data) {
+    //       bias_value = bias_data[out_c];
+    //     }
+    //     output_data[out_c + output_depth * b] =
+    //         ActivationFunctionWithMinMax(total + bias_value, output_activation_min, output_activation_max);
+
+    //     if (print_all) printf("total_1 is: %f batch: %d out_c: %d\n", output_data[out_c + output_depth * b], b, out_c);
+
+    //     // debugging
+    //     total_1[out_c + output_depth * b] = output_data[out_c + output_depth * b];
+    //   }
+    // }
+
+    // 2 - basic accumulation level
+    // /*
+    printf("[humu]: fine-grained #2 basic accumulation level\n");
+    float mult[accum_depth];
+    float total_2[batches * output_depth];
+    init_array_0(total_2, batches * output_depth);
+    for (int b = 0; b < batches; ++b) {
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        float total = 0.f;
+
+        // Run with mult accelerator - sending input_data[0:accum_depth] and weights_data[0:accum_depth]
+        // for (int d = 0; d < accum_depth; ++d) {
+        // 	mult[d] = input_data[b * accum_depth + d] *
+        // 		weights_data[out_c * accum_depth + d];
+        // }
+        tf_mult3_cfg_000[0].tf_length = accum_depth;
+        tf_mult3_cfg_000[0].tf_src_dst_offset_0 = 0;
+        tf_mult3_cfg_000[0].tf_src_dst_offset_1 = accum_depth;
+        tf_mult3_cfg_000[0].tf_src_dst_offset_2 = accum_depth + accum_depth;
+                print_tf_mult3_cfg(&cfg_tf_mult3[0], &tf_mult3_cfg_000[0]);
+
+        token_t* acc_buf;
+        acc_buf = (token_t*)esp_alloc(5000000);
+        cfg_tf_mult3[0].hw_buf = acc_buf;
+        // esp_run_no_print(cfg_tf_mult3, NACC);
+        esp_run_no_print(cfg_tf_mult3, NACC);
+        esp_free(acc_buf);
+
+        // Accumulate
+        for (int d = 0; d < accum_depth; ++d) {
+          total_2[out_c + output_depth * b] += mult[d];
+        }
+      }
+      if (bias_data) {
+        // Run with Add accelerator
+        // for (int out_c = 0; out_c < output_depth; ++out_c) {
+        //   total_2[out_c + output_depth * b] += bias_data[out_c];
+        // }
+        tf_add3_cfg_000[0].tf_length = output_depth;
+        tf_add3_cfg_000[0].tf_src_dst_offset_0 = 0;
+        tf_add3_cfg_000[0].tf_src_dst_offset_1 = output_depth;
+        tf_add3_cfg_000[0].tf_src_dst_offset_2 = output_depth + output_depth;
+                print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
+
+        token_t* acc_buf;
+        acc_buf = (token_t*)esp_alloc(5000000);
+        cfg_tf_add3[0].hw_buf = acc_buf;
+        esp_run_no_print(cfg_tf_add3, NACC);
+        esp_free(acc_buf);
+      }
+
+      // Activation
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        output_data_2[out_c + output_depth * b] =
+            ActivationFunctionWithMinMax(total_2[out_c + output_depth * b], output_activation_min, output_activation_max);
+
+        if (print_all) printf("total_2 is: %f batch: %d out_c: %d\n", output_data_2[out_c + output_depth * b], b, out_c);
+
+        // debugging
+        total_2[out_c + output_depth * b] = output_data_2[out_c + output_depth * b];
+        if (total_2[out_c + output_depth * b] != total_1[out_c + output_depth * b]) {
+          printf("mismatch %d", out_c + output_depth * b);
+          errors++;
+        }
+      }
+    }
+    // */
+
+    // 3 - output level
+    /*
+    printf("[humu]: fine-grained #3 output level\n");
+
+    float mult_batch[accum_depth * output_depth];
+    float total_3[batches * output_depth];
+    init_array_0(total_3, batches * output_depth);
+
+    for (int b = 0; b < batches; ++b) {
+      // Initialize vector for inputs
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        for (int d = 0; d < accum_depth; ++d) {
+          mult_batch[d + out_c * accum_depth] = input_data[b * accum_depth + d];
+        }
+      }
+
+      // Run mult accelerator
+      // for (int i = 0; i < output_depth * accum_depth; i++) {
+      //   mult_batch[i] *= weights_data[i];
+      // }
+      tf_mult3_cfg_000[0].tf_length = output_depth * accum_depth;
+      tf_mult3_cfg_000[0].tf_src_dst_offset_0 = 0;
+      tf_mult3_cfg_000[0].tf_src_dst_offset_1 = output_depth * accum_depth;
+      tf_mult3_cfg_000[0].tf_src_dst_offset_2 = output_depth * accum_depth + output_depth * accum_depth;
+      print_tf_mult3_cfg(&cfg_tf_mult3[0], &tf_mult3_cfg_000[0]);
+      token_t* acc_buf;
+      acc_buf = (token_t*)esp_alloc(5000000);
+      cfg_tf_mult3[0].hw_buf = acc_buf;
+      // esp_run_no_print(cfg_tf_mult3, NACC);
+      esp_run_no_print(cfg_tf_mult3, NACC);
+      esp_free(acc_buf);
+
+      // Accumulate output
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        for (int d = 0; d < accum_depth; ++d) {
+          total_3[out_c + output_depth * b] += mult_batch[out_c * accum_depth + d];
+        }
+      }
+
+      if (bias_data) {
+        // replace with Add accelerator
+        // for (int out_c = 0; out_c < output_depth; ++out_c) {
+        //   total_3[out_c + output_depth * b] += bias_data[out_c];
+        // }
+        tf_add3_cfg_000[0].tf_length = output_depth;
+        tf_add3_cfg_000[0].tf_src_dst_offset_0 = 0;
+        tf_add3_cfg_000[0].tf_src_dst_offset_1 = output_depth;
+        tf_add3_cfg_000[0].tf_src_dst_offset_2 = output_depth + output_depth;
+        print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
+        token_t* acc_buf;
+        acc_buf = (token_t*)esp_alloc(5000000);
+        cfg_tf_add3[0].hw_buf = acc_buf;
+        esp_run_no_print(cfg_tf_add3, NACC);
+        esp_free(acc_buf);
+      }
+
+      // Activation
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        output_data_3[out_c + output_depth * b] =
+            ActivationFunctionWithMinMax(total_3[out_c + output_depth * b], output_activation_min, output_activation_max);
+
+        if (print_all) printf("total_3 is: %f batch: %d out_c: %d\n", output_data_3[out_c + output_depth * b], b, out_c);
+
+        // debugging
+        total_3[out_c + output_depth * b] = output_data_3[out_c + output_depth * b];
+        if (total_3[out_c + output_depth * b] != total_1[out_c + output_depth * b]) {
+          printf("mismatch %d", out_c + output_depth * b);
+          errors++;
+        }
+      }
+    }
+    */
+
+    // 4 - batch level
+    /*
+    printf("[humu]: fine-grained #4 batch level\n");
+
+    float mult_above_batch[batches * accum_depth * output_depth];
+    float above_batch_weights_data[batches * output_depth * accum_depth];
+    float above_batch_bias_data[batches * output_depth];
+    float total_4[batches * output_depth];
+    init_array_0(total_4, batches * output_depth);
+
+    // Initialize vector for inputs
+    for (int b = 0; b < batches; ++b) {
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        for (int d = 0; d < accum_depth; ++d) {
+          mult_above_batch[d + out_c * accum_depth + b * accum_depth * output_depth] = input_data[b * accum_depth + d];
+        }
+      }
+    }
+
+    // Initialize vector for weights
+    for (int b = 0; b < batches; ++b) {
+      for (int i = 0; i < output_depth * accum_depth; i++) {
+        above_batch_weights_data[i + b * output_depth * accum_depth] = weights_data[i];
+      }
+    }
+
+    // Run mult accelerator
+    // for (int j = 0; j < batches * output_depth * accum_depth; ++j) {
+    //   mult_above_batch[j] *= above_batch_weights_data[j];
+    // }
+    tf_mult3_cfg_000[0].tf_length = batches * output_depth * accum_depth;
+    tf_mult3_cfg_000[0].tf_src_dst_offset_0 = 0;
+    tf_mult3_cfg_000[0].tf_src_dst_offset_1 = batches * output_depth * accum_depth;
+    tf_mult3_cfg_000[0].tf_src_dst_offset_2 = batches * output_depth * accum_depth + batches * output_depth * accum_depth;
+    print_tf_mult3_cfg(&cfg_tf_mult3[0], &tf_mult3_cfg_000[0]);
+    token_t* acc_buf;
+    acc_buf = (token_t*)esp_alloc(5000000);
+    cfg_tf_mult3[0].hw_buf = acc_buf;
+    // esp_run_no_print(cfg_tf_mult3, NACC);
+    esp_run_no_print(cfg_tf_mult3, NACC);
+    esp_free(acc_buf);
+
+    // Accumulate output vector
+    for (int b = 0; b < batches; ++b) {
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        for (int d = 0; d < accum_depth; ++d) {
+          total_4[out_c + output_depth * b] += mult_above_batch[out_c * accum_depth + d + b * accum_depth * output_depth];
+        }
+      }
+    }
+
+    if (bias_data) {
+      // Initialize vector for bias
+      for (int b = 0; b < batches; ++b) {
+        for (int i = 0; i < output_depth; i++) {
+          above_batch_bias_data[i + b * output_depth] = bias_data[i];
+        }
+      }
+      // Run with Add accelerator
+      // for (int i = 0; i < batches * output_depth; ++i) {
+      //   total_4[i] += above_batch_bias_data[i];
+      // }
+      tf_add3_cfg_000[0].tf_length = batches * output_depth;
+      tf_add3_cfg_000[0].tf_src_dst_offset_0 = 0;
+      tf_add3_cfg_000[0].tf_src_dst_offset_1 = batches * output_depth;
+      tf_add3_cfg_000[0].tf_src_dst_offset_2 = batches * output_depth + batches * output_depth;
+
+      print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
+
+      token_t* acc_buf;
+      acc_buf = (token_t*)esp_alloc(5000000);
+      cfg_tf_add3[0].hw_buf = acc_buf;
+        esp_run_no_print(cfg_tf_add3, NACC);
+      esp_free(acc_buf);
+    }
+
+    // Activation
+    for (int b = 0; b < batches; ++b) {
+      for (int out_c = 0; out_c < output_depth; ++out_c) {
+        output_data_4[out_c + output_depth * b] =
+            ActivationFunctionWithMinMax(total_4[out_c + output_depth * b], output_activation_min, output_activation_max);
+
+        if (print_all) printf("total_4 is: %f batch: %d out_c: %d\n", output_data_4[out_c + output_depth * b], b, out_c);
+
+        // debugging
+        total_4[out_c + output_depth * b] = output_data_4[out_c + output_depth * b];
+        if (total_4[out_c + output_depth * b] != total_1[out_c + output_depth * b]) {
+          printf("mismatch %d ", out_c + output_depth * b);
+          errors++;
+        }
+      }
+    }
+    */
+
+    printf("Number of errors: %d \n", errors);
+
+    return kTfLiteOk;
+  }
+
   // Computes the result of addition of 'input_tensor_1' and 'input_tensor_2'
   // and store the result in 'output_tensor'.
   TfLiteStatus ComputeResult(TfLiteContext* context, int builtin_code, const TfLiteTensor* input_tensor_1,
                              const TfLiteTensor* input_tensor_2, TfLiteTensor* output_tensor) {
     fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult, builtin_code = %d\n", builtin_code);
 
-    // This code assumes no activation, and no broadcasting needed (both inputs have the same size).
+    if (NumElements(input_tensor_1) != NumElements(input_tensor_2) || NumElements(input_tensor_1) != NumElements(output_tensor)) {
+      return kTfLiteDelegateError;
+    }
+    // This code assumes no activation, and no broadcasting needed (both inputs
+    // have the same size).
     auto* input_1 = GetTensorData<float>(input_tensor_1);
     auto* input_2 = GetTensorData<float>(input_tensor_2);
     auto* output = GetTensorData<float>(output_tensor);
+
+    fprintf(stderr, "\n\n\n[humu]: XNNPACK-ESP ComputeResult, NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
+
+    for (int i = 0; i < NumElements(input_tensor_1); ++i) {
+      if (builtin_code == kTfLiteBuiltinAdd) {
+        // fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult Add %d\n", i);
+        output[i] = input_1[i] + input_2[i];
+      }
+      if (builtin_code == kTfLiteBuiltinSub) {
+        // fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult Sub %d\n", i);
+        output[i] = input_1[i] - input_2[i];
+      }
+    }
+    return kTfLiteOk;
+
+    fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult SHOULDN'T SEE THIS!!!\n");
+
+    // This code assumes no activation, and no broadcasting needed (both inputs have the same size).
+    // auto* input_1 = GetTensorData<float>(input_tensor_1);
+    // auto* input_2 = GetTensorData<float>(input_tensor_2);
+    // auto* output = GetTensorData<float>(output_tensor);
 
     //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: NumElements(input_tensor_1) = %d\n", NumElements(input_tensor_1));
     //  fprintf(stderr, "[humu]: XNNPACK-ESP ComputeResult: NumElements(input_tensor_2) = %d\n", NumElements(input_tensor_2));
@@ -508,7 +860,6 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
 
       if (NumElements(input_tensor_1) != NumElements(input_tensor_2)) {
         if (NumElements(input_tensor_1) == 1) {
-
           // set Acc configs
           int num_add_run = 1;
           int len = NumElements(input_tensor_2);
@@ -521,7 +872,7 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
           tf_add3_cfg_000[0].tf_src_dst_offset_1 = len;
           tf_add3_cfg_000[0].tf_src_dst_offset_2 = len + len;
 
-        print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
+          print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
 
           token_t* acc_buf;
           acc_buf = (token_t*)esp_alloc(5000000);
@@ -536,7 +887,6 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
         }
 
         if (NumElements(input_tensor_2) == 1) {
-
           // set Acc configs
           int num_add_run = 1;
           int len = NumElements(input_tensor_1);
@@ -550,7 +900,6 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
           tf_add3_cfg_000[0].tf_src_dst_offset_2 = len + len;
 
           print_tf_add3_cfg(&cfg_tf_add3[0], &tf_add3_cfg_000[0]);
-
 
           token_t* acc_buf;
           acc_buf = (token_t*)esp_alloc(5000000);
@@ -567,13 +916,13 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
       }
 
       if (NumElements(input_tensor_1) == NumElements(input_tensor_2)) {
-        // NumElements(input_tensor_1) == NumElements(input_tensor_2) == NumElements(output_tensor) 
+        // NumElements(input_tensor_1) == NumElements(input_tensor_2) == NumElements(output_tensor)
         // for (int i = 0; i < NumElements(input_tensor_1); ++i) {
-          // fprintf(stderr, "[humu]: debug 2, 0\n");
-          // output[i] = input_1[i] + input_2[i];
-          // float temp = input_1[i] + input_2[i];
-          // float temp = i;
-          // fprintf(stderr, "[humu]: debug 2, %f\n", temp);
+        // fprintf(stderr, "[humu]: debug 2, 0\n");
+        // output[i] = input_1[i] + input_2[i];
+        // float temp = input_1[i] + input_2[i];
+        // float temp = i;
+        // fprintf(stderr, "[humu]: debug 2, %f\n", temp);
         // }
 
         // set Acc configs
@@ -917,6 +1266,8 @@ class XNNPackDelegateKernel : public SimpleDelegateKernelInterface {
   // builtin_code_[i] is the type of node at index 'i'
   std::vector<int> builtin_code_;
 
+  int counter_Eval;
+
   const TfLiteXNNPackDelegateOptions options_;
 };
 
@@ -930,14 +1281,15 @@ class XNNPackDelegate : public SimpleDelegateInterface {
   explicit XNNPackDelegate(const TfLiteXNNPackDelegateOptions& options) : options_(options) {}
   bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration, const TfLiteNode* node, TfLiteContext* context) const override {
     if (
+        // [humu]: place holder for formatter
         registration->builtin_code != kTfLiteBuiltinAdd
         // registration->builtin_code != kTfLiteBuiltinSub &&
         // registration->builtin_code != kTfLiteBuiltinMul
         // registration->builtin_code != kTfLiteBuiltinFullyConnected
         // registration->builtin_code != kTfLiteBuiltinDepthwiseConv2d &&
         // registration->builtin_code != kTfLiteBuiltinConv2d
-        // [humu]: place holder
-        ) {
+        // [humu]: place holder for formatter
+    ) {
       return false;
     }
 
