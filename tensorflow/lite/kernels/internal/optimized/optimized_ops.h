@@ -323,6 +323,20 @@ inline void FullyConnected(
   printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_min : %d\n", gemm_params.clamp_min);
   printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_max : %d\n", gemm_params.clamp_max);
 
+  const int output_dims_count = output_shape.DimensionsCount();
+  const int weights_dims_count = weights_shape.DimensionsCount();
+  const int batches = FlatSizeSkipDim(output_shape, output_dims_count - 1);
+  const int output_depth = MatchingDim(weights_shape, weights_dims_count - 2,
+                                       output_shape, output_dims_count - 1);
+  const int accum_depth = weights_shape.Dims(weights_dims_count - 1);
+  printf("[humu]: optimized_ops.h, FullyConnected(),  output_dims_count: %d\n", output_dims_count);
+  printf("[humu]: optimized_ops.h, FullyConnected(),  weights_dims_count: %d\n", weights_dims_count);
+  printf("[humu]: optimized_ops.h, FullyConnected(),  batches: %d\n", batches);
+  printf("[humu]: optimized_ops.h, FullyConnected(),  output_depth: %d\n", output_depth);
+  printf("[humu]: optimized_ops.h, FullyConnected(),  accum_depth: %d\n", accum_depth);
+
+
+
 
   cpu_backend_gemm::Gemm(lhs_params, weights_data, rhs_params, input_data,
                          dst_params, output_data, gemm_params,
