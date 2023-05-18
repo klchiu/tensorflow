@@ -20,6 +20,11 @@ limitations under the License.
 #include "tensorflow/lite/optional_debug_tools.h"
 
 
+#include <sys/time.h>   // NOLINT(build/include_order)
+
+double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
+
+
 // #include "tensorflow/esp_libs/esp_api_include.h"
 
 // extern "C"{
@@ -80,13 +85,11 @@ int main(int argc, char* argv[]) {
   // Run inference
   printf("\n\n=== [humu]: 1 ===\n");
   struct timeval start_time, stop_time;
-  // gettimeofday(&start_time, nullptr);
+  gettimeofday(&start_time, nullptr);
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
-  // gettimeofday(&stop_time, nullptr);
-  // LOG(INFO) << "invoked";
-  // LOG(INFO) << "total time: "
-  //           << (get_us(stop_time) - get_us(start_time)) / 1000
-  //           << " ms";
+  gettimeofday(&stop_time, nullptr);
+  printf("\n\n=== Invoke time: %f ms\n", (get_us(stop_time) - get_us(start_time))/1000.0);
+
 
   printf("\n\n=== Post-invoke Interpreter State ===\n");
   // tflite::PrintInterpreterState(interpreter.get());

@@ -334,6 +334,8 @@ void RunInference(Settings* settings,
 
   if (settings->profiling) profiler->StartProfiling();
   for (int i = 0; i < settings->number_of_warmup_runs; i++) {
+    printf("[humu]: label_image.cc, RunInference: i = %d, number_of_warmup_runs = %d\n", i, settings->number_of_warmup_runs);
+
     if (interpreter->Invoke() != kTfLiteOk) {
       LOG(ERROR) << "Failed to invoke tflite!";
       exit(-1);
@@ -343,6 +345,7 @@ void RunInference(Settings* settings,
   struct timeval start_time, stop_time;
   gettimeofday(&start_time, nullptr);
   for (int i = 0; i < settings->loop_count; i++) {
+    printf("[humu]: label_image.cc, RunInference: i = %d, loop_count = %d\n", i, settings->loop_count);
     if (interpreter->Invoke() != kTfLiteOk) {
       LOG(ERROR) << "Failed to invoke tflite!";
       exit(-1);
@@ -417,6 +420,8 @@ void RunInference(Settings* settings,
   if (ReadLabelsFile(settings->labels_file_name, &labels, &label_count) !=
       kTfLiteOk)
     exit(-1);
+
+  printf("--- before top results:\n");
 
   for (const auto& result : top_results) {
     const float confidence = result.first;
@@ -576,7 +581,7 @@ int Main(int argc, char** argv) {
   delegate_providers.MergeSettingsIntoParams(s);
   RunInference(&s, delegate_providers);
 
-printf("[humu]: label_image done 0317\n");
+printf("[humu]: label_image done 0515\n");
 
   return 0;
 }
