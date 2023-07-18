@@ -48,6 +48,7 @@ void print_tf_add3_cfg(esp_thread_info_t* thread_cfg, tf_add3_stratus_access* cf
   fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
   fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
   fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
+  fprintf(stderr, "    chunk_size =           %d\n", cfg->chunk_size);
 }
 
 void print_tf_sub3_cfg(esp_thread_info_t* thread_cfg, tf_sub3_stratus_access* cfg) {
@@ -57,6 +58,7 @@ void print_tf_sub3_cfg(esp_thread_info_t* thread_cfg, tf_sub3_stratus_access* cf
   fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
   fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
   fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
+  fprintf(stderr, "    chunk_size =           %d\n", cfg->chunk_size);
 }
 
 void print_tf_mult3_cfg(esp_thread_info_t* thread_cfg, tf_mult3_stratus_access* cfg) {
@@ -66,6 +68,7 @@ void print_tf_mult3_cfg(esp_thread_info_t* thread_cfg, tf_mult3_stratus_access* 
   fprintf(stderr, "    tf_src_dst_offset_0 =  %d\n", cfg->tf_src_dst_offset_0);
   fprintf(stderr, "    tf_src_dst_offset_1 =  %d\n", cfg->tf_src_dst_offset_1);
   fprintf(stderr, "    tf_src_dst_offset_2 =  %d\n", cfg->tf_src_dst_offset_2);
+  fprintf(stderr, "    chunk_size =           %d\n", cfg->chunk_size);
 }
 
 

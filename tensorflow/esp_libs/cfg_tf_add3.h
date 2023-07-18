@@ -15,6 +15,7 @@ struct tf_add3_stratus_access {
 	unsigned int tf_src_dst_offset_0;	// output
 	unsigned int tf_src_dst_offset_1;	// input 1
 	unsigned int tf_src_dst_offset_2;	// input 2
+	unsigned int chunk_size;
 	unsigned int src_offset;
 	unsigned int dst_offset;
 };
@@ -54,6 +55,7 @@ struct tf_add3_stratus_access tf_add3_cfg_000[] = {
 		.tf_src_dst_offset_0 = 0,
 		.tf_src_dst_offset_1 = 1024,
 		.tf_src_dst_offset_2 = 2048,
+		.chunk_size = 4096,
 		.src_offset = 0,
 		.dst_offset = 0,
 	}
