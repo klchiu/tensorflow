@@ -581,7 +581,7 @@ int Main(int argc, char** argv) {
   delegate_providers.MergeSettingsIntoParams(s);
   RunInference(&s, delegate_providers);
 
-printf("[humu]: label_image done 0515\n");
+printf("[humu]: label_image done 0711\n");
 
   return 0;
 }

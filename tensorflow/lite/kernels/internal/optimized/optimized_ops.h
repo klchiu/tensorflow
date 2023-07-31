@@ -272,7 +272,7 @@ inline void FullyConnected(
     const float* optional_bias_data, const RuntimeShape& output_shape,
     float* output_data, CpuBackendContext* cpu_backend_context) {
 
-      printf("[humu]: optimized_ops.h, FullyConnected(), check 0\n");
+      // printf("[humu]: optimized_ops.h, FullyConnected(), check 0\n");
 
 
   ruy::profiler::ScopeLabel label("FullyConnected");
@@ -301,27 +301,27 @@ inline void FullyConnected(
   gemm_params.clamp_min = params.float_activation_min;
   gemm_params.clamp_max = params.float_activation_max;
 
-  printf("[humu]: optimized_ops.h, FullyConnected(), dims_count : %d\n", dims_count);
-  printf("[humu]: optimized_ops.h, FullyConnected(), input_rows : %d\n", input_rows);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), dims_count : %d\n", dims_count);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), input_rows : %d\n", input_rows);
 
-  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.order : %d\n", lhs_params.order);
-  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cols : %d\n", lhs_params.cols);
-  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.rows : %d\n", lhs_params.rows);
-  printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cache_policy : %d\n", lhs_params.cache_policy);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.order : %d\n", lhs_params.order);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cols : %d\n", lhs_params.cols);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.rows : %d\n", lhs_params.rows);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), lhs_params.cache_policy : %d\n", lhs_params.cache_policy);
 
-  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.order : %d\n", rhs_params.order);
-  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cols : %d\n", rhs_params.cols);
-  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.rows : %d\n", rhs_params.rows);
-  printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cache_policy : %d\n", rhs_params.cache_policy);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.order : %d\n", rhs_params.order);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cols : %d\n", rhs_params.cols);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.rows : %d\n", rhs_params.rows);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), rhs_params.cache_policy : %d\n", rhs_params.cache_policy);
 
-  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.order : %d\n", dst_params.order);
-  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.cols : %d\n", dst_params.cols);
-  printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.rows : %d\n", dst_params.rows);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.order : %d\n", dst_params.order);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.cols : %d\n", dst_params.cols);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), dst_params.rows : %d\n", dst_params.rows);
 
 
-  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.bias : %d\n", gemm_params.bias);
-  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_min : %d\n", gemm_params.clamp_min);
-  printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_max : %d\n", gemm_params.clamp_max);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.bias : %d\n", gemm_params.bias);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_min : %d\n", gemm_params.clamp_min);
+  // printf("[humu]: optimized_ops.h, FullyConnected(), gemm_params.clamp_max : %d\n", gemm_params.clamp_max);
 
   const int output_dims_count = output_shape.DimensionsCount();
   const int weights_dims_count = weights_shape.DimensionsCount();
@@ -329,11 +329,11 @@ inline void FullyConnected(
   const int output_depth = MatchingDim(weights_shape, weights_dims_count - 2,
                                        output_shape, output_dims_count - 1);
   const int accum_depth = weights_shape.Dims(weights_dims_count - 1);
-  printf("[humu]: optimized_ops.h, FullyConnected(),  output_dims_count: %d\n", output_dims_count);
-  printf("[humu]: optimized_ops.h, FullyConnected(),  weights_dims_count: %d\n", weights_dims_count);
-  printf("[humu]: optimized_ops.h, FullyConnected(),  batches: %d\n", batches);
-  printf("[humu]: optimized_ops.h, FullyConnected(),  output_depth: %d\n", output_depth);
-  printf("[humu]: optimized_ops.h, FullyConnected(),  accum_depth: %d\n", accum_depth);
+  // printf("[humu]: optimized_ops.h, FullyConnected(),  output_dims_count: %d\n", output_dims_count);
+  // printf("[humu]: optimized_ops.h, FullyConnected(),  weights_dims_count: %d\n", weights_dims_count);
+  // printf("[humu]: optimized_ops.h, FullyConnected(),  batches: %d\n", batches);
+  // printf("[humu]: optimized_ops.h, FullyConnected(),  output_depth: %d\n", output_depth);
+  // printf("[humu]: optimized_ops.h, FullyConnected(),  accum_depth: %d\n", accum_depth);
 
 
 
@@ -350,7 +350,7 @@ inline void FullyConnected(
     const int32* bias_data, const RuntimeShape& output_shape,
     uint8* output_data, CpuBackendContext* cpu_backend_context) {
 
-            printf("[humu]: optimized_ops.h, FullyConnected(), check 1\n");
+            // printf("[humu]: optimized_ops.h, FullyConnected(), check 1\n");
 
   ruy::profiler::ScopeLabel label("FullyConnected/8bit");
   const int32 input_offset = params.input_offset;
@@ -416,7 +416,7 @@ inline void FullyConnected(
     const int32* bias_data_int32, const RuntimeShape& output_shape,
     int16* output_data, CpuBackendContext* cpu_backend_context) {
 
-      printf("[humu]: optimized_ops.h, FullyConnected(), check 2\n");
+      // printf("[humu]: optimized_ops.h, FullyConnected(), check 2\n");
 
 
   ruy::profiler::ScopeLabel label("FullyConnected/Uint8Int16");

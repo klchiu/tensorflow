@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
 
 
   printf("\n\n=== Post-invoke Interpreter State ===\n");
-  // tflite::PrintInterpreterState(interpreter.get());
+  tflite::PrintInterpreterState(interpreter.get());
 
 
 // void *buf = NULL;

@@ -68,6 +68,7 @@ inline TfLiteStatus ValidateTensorIndexingSafe(const TfLiteContext* context,
   }
 
   *tensor_index = tensor_indices[index];
+  fprintf(stderr, "---------------------->>>  tensor_index : %d\n", *tensor_index);
   return kTfLiteOk;
 }
 

@@ -328,7 +328,7 @@ TfLiteStatus Prepare(KernelType kernel_type, TfLiteContext* context,
   auto* params = reinterpret_cast<TfLiteConvParams*>(node->builtin_data);
   OpData* data = reinterpret_cast<OpData*>(node->user_data);
 
-// printf("[humu]: conv.cc, Prepare\n");
+printf("[humu]: conv.cc, Prepare\n");
 
   bool has_bias = node->inputs->size == 3;
   // Check number of inputs/outputs
@@ -651,7 +651,7 @@ void EvalQuantized(TfLiteContext* context, TfLiteNode* node,
                    const TfLiteTensor* input, const TfLiteTensor* filter,
                    const TfLiteTensor* bias, TfLiteTensor* im2col,
                    TfLiteTensor* output) {
-// printf("[humu]: conv.cc, EvalQuantized\n");
+printf("[humu]: conv.cc, EvalQuantized\n");
 
   auto input_offset = -input->params.zero_point;
   auto filter_offset = -filter->params.zero_point;
@@ -730,7 +730,7 @@ void EvalQuantizedPerChannel(TfLiteContext* context, TfLiteNode* node,
                              const TfLiteTensor* filter,
                              const TfLiteTensor* bias, TfLiteTensor* output,
                              TfLiteTensor* im2col) {
-// printf("[humu]: conv.cc, EvalQuantizedPerChannel\n");
+printf("[humu]: conv.cc, EvalQuantizedPerChannel\n");
 
 
   ConvParams op_params;
@@ -793,7 +793,7 @@ void EvalQuantizedPerChannel16x8(TfLiteContext* context, TfLiteNode* node,
                                  const TfLiteTensor* filter,
                                  const TfLiteTensor* bias, TfLiteTensor* output,
                                  TfLiteTensor* im2col) {
-// printf("[humu]: conv.cc, EvalQuantizedPerChannel16x8\n");
+printf("[humu]: conv.cc, EvalQuantizedPerChannel16x8\n");
 
   ConvParams op_params;
   op_params.input_offset = -input->params.zero_point;
@@ -864,7 +864,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
                const TfLiteTensor* bias, TfLiteTensor* im2col,
                TfLiteTensor* hwcn_weights, TfLiteTensor* output) {
 
-// printf("[humu]: conv.cc, EvalFloat\n");
+printf("[humu]: conv.cc, EvalFloat\n");
 
   float output_activation_min, output_activation_max;
   CalculateActivationRange(params->activation, &output_activation_min,
@@ -912,7 +912,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
   op_params.float_activation_max = output_activation_max;
   switch (effective_kernel_type) {
     case kReference: {
-      // printf("[humu]: conv.cc, EvalFloat:kReference \n");
+      printf("[humu]: conv.cc, EvalFloat:kReference \n");
 
       reference_ops::Conv(op_params, GetTensorShape(input),
                           GetTensorData<float>(input), GetTensorShape(filter),
@@ -924,7 +924,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
     }
     case kCblasOptimized:
     case kGenericOptimized: {
-            // printf("[humu]: conv.cc, EvalFloat:kGenericOptimized \n");
+            printf("[humu]: conv.cc, EvalFloat:kGenericOptimized \n");
 
       optimized_ops::Conv(op_params, GetTensorShape(input),
                           GetTensorData<float>(input), GetTensorShape(filter),
@@ -936,11 +936,11 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
       break;
     }
     case kMultithreadOptimized: {
-                  // printf("[humu]: conv.cc, EvalFloat:kMultithreadOptimized \n");
+                  printf("[humu]: conv.cc, EvalFloat:kMultithreadOptimized \n");
 
 #if defined(TFLITE_WITH_MULTITHREADED_EIGEN)
 
-    // printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 1 \n");
+    printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 1 \n");
 
       const float* filter_data;
       if (data->need_hwcn_weights) {
@@ -958,7 +958,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
       break;
 #else   // !defined(TFLITE_WITH_MULTITHREADED_EIGEN)
 
-    // printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 0 \n");
+    printf("[humu]: conv.cc, EvalFloat:TFLITE_WITH_MULTITHREADED_EIGEN = 0 \n");
       // See Register_CONV_2D: we should never be here when TFLITE_WITH_RUY
       // was enabled. We #if out this code in order to get the corresponding
       // binary size benefits.
@@ -976,7 +976,7 @@ TfLiteStatus EvalHybridPerChannel(TfLiteContext* context, TfLiteNode* node,
                                   const TfLiteTensor* bias,
                                   TfLiteTensor* im2col, TfLiteTensor* output) {
 
-// printf("[humu]: conv.cc, EvalHybridPerChannel\n");
+printf("[humu]: conv.cc, EvalHybridPerChannel\n");
 
   float output_activation_min, output_activation_max;
   CalculateActivationRange(params->activation, &output_activation_min,
@@ -1108,7 +1108,7 @@ TfLiteStatus EvalHybrid(TfLiteContext* context, TfLiteNode* node,
                                      &scaling_factors_tensor));
   float* scaling_factors_ptr = GetTensorData<float>(scaling_factors_tensor);
 
-// printf("[humu]: conv.cc, EvalHybrid\n");
+printf("[humu]: conv.cc, EvalHybrid\n");
 
   // Per-batch input quantization for higher accuracy.
   {
@@ -1169,7 +1169,7 @@ TfLiteStatus EvalImpl(TfLiteContext* context, TfLiteNode* node) {
   auto* params = reinterpret_cast<TfLiteConvParams*>(node->builtin_data);
   OpData* data = reinterpret_cast<OpData*>(node->user_data);
 
-// printf("[humu]: conv.cc, EvalImpl\n");
+printf("[humu]: conv.cc, EvalImpl\n");
 
   TfLiteTensor* output;
   TF_LITE_ENSURE_OK(context, GetOutputSafe(context, node, 0, &output));
@@ -1243,7 +1243,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteTensor* input;
   TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, 0, &input));
 
-  // printf("[humu]: conv.cc, Eval\n");
+  printf("[humu]: conv.cc, Eval\n");
 
 
   switch (input->type) {

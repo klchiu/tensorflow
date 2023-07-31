@@ -1160,14 +1160,14 @@ TfLiteStatus EvalFloat(TfLiteContext* context, TfLiteNode* node,
                        const TfLiteTensor* input, const TfLiteTensor* filter,
                        const TfLiteTensor* bias, TfLiteTensor* output) {
                       
-printf("[humu]: fully_connected.cc, EvalFloat\n");
+// printf("[humu]: fully_connected.cc, EvalFloat\n");
 
 
   float output_activation_min, output_activation_max;
   CalculateActivationRange(params->activation, &output_activation_min,
                            &output_activation_max);
   if (kernel_type == kReference) {
-    printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: kReference\n");
+    // printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: kReference\n");
 
     FullyConnectedParams op_params;
     op_params.float_activation_min = output_activation_min;
@@ -1188,17 +1188,17 @@ printf("[humu]: fully_connected.cc, EvalFloat\n");
           GetTensorShape(output), GetTensorData<float>(output));
     }
   } else if (kernel_type == kLegacyPie) {
-    printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: kLegacyPie\n");
+    // printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: kLegacyPie\n");
 
     return EvalPie(context, node, params, data, input, filter, bias, output);
   } else {
-    printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else\n");
+    // printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else\n");
 
     FullyConnectedParams op_params;
     op_params.float_activation_min = output_activation_min;
     op_params.float_activation_max = output_activation_max;
     if (filter->sparsity != nullptr) {
-          printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else, check 0\n");
+          // printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else, check 0\n");
 
       const auto& sparsity = *filter->sparsity;
       if (!SupportedSparsityFormat(sparsity)) {
@@ -1240,7 +1240,7 @@ printf("[humu]: fully_connected.cc, EvalFloat\n");
       }
 
     } else {
-      printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else, check 1\n");
+      // printf("[humu]: fully_connected.cc, EvalFloat, kernel_type: else, check 1\n");
 
       op_params.lhs_cacheable = IsConstantTensor(filter);
       op_params.rhs_cacheable = IsConstantTensor(input);
@@ -1258,7 +1258,7 @@ printf("[humu]: fully_connected.cc, EvalFloat\n");
 
 template <KernelType kernel_type>
 TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
-  printf("[humu]: fully_connected.cc, Eval\n");
+  // printf("[humu]: fully_connected.cc, Eval\n");
 
 
   auto* params =
@@ -1289,11 +1289,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (filter->type) {
     case kTfLiteFloat32:
-      printf("[humu]: fully_connected.cc, Eval, case: kTfLiteFloat32\n");
+      // printf("[humu]: fully_connected.cc, Eval, case: kTfLiteFloat32\n");
       return EvalFloat<kernel_type>(context, node, params, data, input, filter,
                                     bias, output);
     case kTfLiteUInt8:
-      printf("[humu]: fully_connected.cc, Eval, case: kTfLiteUInt8\n");
+      // printf("[humu]: fully_connected.cc, Eval, case: kTfLiteUInt8\n");
       if (params->weights_format ==
           kTfLiteFullyConnectedWeightsFormatShuffled4x16Int8) {
         TfLiteTensor* shuffled_input_workspace;
@@ -1312,7 +1312,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         return kTfLiteError;
       }
     case kTfLiteInt8:
-      printf("[humu]: fully_connected.cc, Eval, case: kTfLiteInt8\n");
+      // printf("[humu]: fully_connected.cc, Eval, case: kTfLiteInt8\n");
       if (params->weights_format == kTfLiteFullyConnectedWeightsFormatDefault) {
         return EvalQuantized<kernel_type>(context, node, params, data, input,
                                           filter, bias, output);

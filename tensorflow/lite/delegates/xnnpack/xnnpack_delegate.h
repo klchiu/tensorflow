@@ -4,6 +4,8 @@
 #include <memory>
 
 #include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/core/c/builtin_op_data.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,7 +136,6 @@ class TfLiteDelegateFactory {
 #define TFLITE_XNNPACK_DELEGATE_FLAG_QU8 0x00000002
 // Force FP16 inference for FP32 operators.
 #define TFLITE_XNNPACK_DELEGATE_FLAG_FORCE_FP16 0x00000004
-
 
 
 typedef struct {

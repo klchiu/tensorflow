@@ -432,6 +432,18 @@ inline void Conv(const Eigen::ThreadPoolDevice& device,
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+  // printf("[humu]: multithreaded_conv.h, Conv() debug 0 \n");
+
+  // printf("[humu] -- batches       = %d\n", batches   );
+  // printf("[humu] -- input_depth   = %d\n", input_depth   );
+  // printf("[humu] -- output_depth  = %d\n", output_depth  );
+  // printf("[humu] -- input_height  = %d\n", input_height  );
+  // printf("[humu] -- input_width   = %d\n", input_width   );
+  // printf("[humu] -- filter_height = %d\n", filter_height );
+  // printf("[humu] -- filter_width  = %d\n", filter_width  );
+  // printf("[humu] -- output_height = %d\n", output_height );
+  // printf("[humu] -- output_width  = %d\n", output_width  );
+
   EigenTensorConvFunctor<float> conv_functor;
   conv_functor(device, input_data, batches, input_height, input_width,
                input_depth, filter_data, filter_height, filter_width,
