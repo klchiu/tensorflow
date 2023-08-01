@@ -50,6 +50,8 @@ struct esp_access {
 typedef struct esp_accelerator_thread_info {
 	bool run;
 	char *devname;
+	char *devname_noid;
+	char *puffinname;
 	void *hw_buf;
 	int ioctl_req;
 	/* Partially Filled-in by ESPLIB */
