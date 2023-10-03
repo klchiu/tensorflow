@@ -19,6 +19,29 @@ limitations under the License.
 #include "tensorflow/lite/model.h"
 #include "tensorflow/lite/optional_debug_tools.h"
 
+#include <fcntl.h>      // NOLINT(build/include_order)
+#include <getopt.h>     // NOLINT(build/include_order)
+#include <sys/time.h>   // NOLINT(build/include_order)
+#include <sys/types.h>  // NOLINT(build/include_order)
+#include <sys/uio.h>    // NOLINT(build/include_order)
+#include <unistd.h>     // NOLINT(build/include_order)
+
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
+
 // This is an example that is minimal to read a model
 // from disk and perform inference. There is no data being loaded
 // that is up to you to add as a user.
@@ -59,18 +82,24 @@ int main(int argc, char* argv[]) {
 
   // Allocate tensor buffers.
   TFLITE_MINIMAL_CHECK(interpreter->AllocateTensors() == kTfLiteOk);
-  printf("=== Pre-invoke Interpreter State ===\n");
-  tflite::PrintInterpreterState(interpreter.get());
+  //printf("=== Pre-invoke Interpreter State ===\n");
+  //tflite::PrintInterpreterState(interpreter.get());
 
   // Fill input buffers
   // TODO(user): Insert code to fill input tensors.
   // Note: The buffer of the input tensor with index `i` of type T can
   // be accessed with `T* input = interpreter->typed_input_tensor<T>(i);`
 
+  struct timeval start_time, stop_time;
+  gettimeofday(&start_time, nullptr);
   // Run inference
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
-  printf("\n\n=== Post-invoke Interpreter State ===\n");
-  tflite::PrintInterpreterState(interpreter.get());
+  //printf("\n\n=== Post-invoke Interpreter State ===\n");
+  //tflite::PrintInterpreterState(interpreter.get());
+  gettimeofday(&stop_time, nullptr);
+  printf("----------------------\n");
+  printf("Time: %f ms\n", (get_us(stop_time) - get_us(start_time)) / 1000.0);
+  printf("----------------------\n");
 
   // Read output buffers
   // TODO(user): Insert getting data out code.
