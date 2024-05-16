@@ -120,6 +120,11 @@ void Gemm(const MatrixParams<LhsScalar>& lhs_params, const LhsScalar* lhs_data,
           CpuBackendContext* context) {
 
   printf("[humu]: cpu_backend_gemm.h, Gemm()\n");
+  printf("[humu]: cpu_backend_gemm.h, lhs_params.rows = %d\n", lhs_params.rows);
+  printf("[humu]: cpu_backend_gemm.h, lhs_params.cols = %d\n", lhs_params.cols);
+  printf("[humu]: cpu_backend_gemm.h, rhs_params.rows = %d\n", rhs_params.rows);
+  printf("[humu]: cpu_backend_gemm.h, rhs_params.cols = %d\n", rhs_params.cols);
+
 
 
   ruy::profiler::ScopeLabel label("cpu_backend_gemm::Gemm");
