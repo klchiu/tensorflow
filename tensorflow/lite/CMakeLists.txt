@@ -70,6 +70,7 @@ option(TFLITE_ENABLE_MMAP "Enable MMAP (unsupported on Windows)" ON)
 option(TFLITE_ENABLE_GPU "Enable GPU" OFF)
 option(TFLITE_ENABLE_METAL "Enable Metal delegate (iOS only)" OFF)
 option(TFLITE_ENABLE_XNNPACK "Enable XNNPACK backend" ON)
+# option(TFLITE_ENABLE_WOLT "Enable WOLT backend" ON)
 option(TFLITE_ENABLE_EXTERNAL_DELEGATE "Enable External Delegate backend" ON)
 
 option(TFLITE_KERNEL_TEST "Enable tflite kernel unit test" OFF)
@@ -225,6 +226,9 @@ populate_tflite_source_vars("." TFLITE_SRCS)
 # This particular file is excluded because the more explicit approach to enable
 # XNNPACK delegate is preferred to the weak-symbol one.
 list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*tflite_with_xnnpack\\.cc$")
+
+# WOLT delegate is preferred to the weak-symbol one.
+# list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*tflite_with_wolt\\.cc$")
 
 # Exclude Flex related files.
 list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*with_selected_ops\\.cc$")
@@ -437,6 +441,18 @@ if(TFLITE_ENABLE_XNNPACK)
   )
   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
 endif()
+# if(TFLITE_ENABLE_WOLT)
+#   # find_package(fp16_headers REQUIRED)
+#   # find_package(WOLT REQUIRED)
+#   populate_tflite_source_vars("delegates/wolt"
+#     TFLITE_DELEGATES_WOLT_SRCS
+#     FILTER ".*(_test|_tester)\\.(cc|h)"
+#   )
+#   list(APPEND TFLITE_TARGET_DEPENDENCIES
+#     WOLT
+#   )
+#   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_WOLT_DELEGATE")
+# endif()
 if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
   populate_tflite_source_vars("delegates/external"
     TFLITE_DELEGATES_EXTERNAL_SRCS
@@ -522,6 +538,7 @@ set(_ALL_TFLITE_SRCS
   ${TFLITE_DELEGATES_NNAPI_SRCS}
   ${TFLITE_DELEGATES_SRCS}
   ${TFLITE_DELEGATES_XNNPACK_SRCS}
+  # ${TFLITE_DELEGATES_WOLT_SRCS}
   ${TFLITE_DELEGATES_EXTERNAL_SRCS}
   ${TFLITE_EXPERIMENTAL_REMAT_SRCS}
   ${TFLITE_EXPERIMENTAL_RESOURCE_SRCS}

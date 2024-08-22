@@ -29,7 +29,7 @@ list(APPEND TFLITE_LABEL_IMAGE_SRCS
   ${TFLITE_SOURCE_DIR}/tools/command_line_flags.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/default_execution_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/delegate_provider.cc
-  ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
+  # ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
   ${TFLITE_SOURCE_DIR}/tools/tool_params.cc
 )
 
@@ -37,10 +37,23 @@ if(TFLITE_ENABLE_XNNPACK)
   list(APPEND TFLITE_LABEL_IMAGE_SRCS
     ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
     ${TFLITE_SOURCE_DIR}/core/experimental/acceleration/configuration/c/xnnpack_plugin.cc
+    ${TFLITE_SOURCE_DIR}/tools/evaluation/utils.cc
   )
 else()
   set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_XNNPACK")
 endif()  # TFLITE_ENABLE_XNNPACK
+
+
+
+if(TFLITE_ENABLE_WOLT)
+  list(APPEND TFLITE_LABEL_IMAGE_SRCS
+    ${TFLITE_SOURCE_DIR}/tools/delegates/wolt_delegate_provider.cc
+  )
+else()
+  set(TFLITE_LABEL_IMAGE_CC_OPTIONS "-DTFLITE_WITHOUT_WOLT")
+endif()  # TFLITE_ENABLE_WOLT
+
+
 
 if(CMAKE_SYSTEM_NAME MATCHES "Android")
   if(_TFLITE_ENABLE_NNAPI)

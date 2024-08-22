@@ -61,6 +61,36 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+
+
+printf("[humu]: [conv.h] stride_width = %d\n", stride_width);
+printf("[humu]: [conv.h] stride_height = %d\n", stride_height);
+printf("[humu]: [conv.h] dilation_width_factor = %d\n", dilation_width_factor);
+printf("[humu]: [conv.h] dilation_height_factor = %d\n", dilation_height_factor);
+printf("[humu]: [conv.h] pad_width = %d\n", pad_width);
+printf("[humu]: [conv.h] pad_height = %d\n", pad_height);
+printf("[humu]: [conv.h] output_activation_min = %f\n", output_activation_min);
+printf("[humu]: [conv.h] output_activation_max = %f\n", output_activation_max);
+printf("[humu]: [conv.h] input_shape.DimensionsCount() = %d\n", input_shape.DimensionsCount());
+printf("[humu]: [conv.h] filter_shape.DimensionsCount() = %d\n", filter_shape.DimensionsCount());
+printf("[humu]: [conv.h] output_shape.DimensionsCount() = %d\n", output_shape.DimensionsCount());
+printf("[humu]: [conv.h] batches = %d\n", batches);
+printf("[humu]: [conv.h] input_depth = %d\n", input_depth);
+printf("[humu]: [conv.h] output_depth = %d\n", output_depth);
+printf("[humu]: [conv.h] bias_shape.FlatSize() = %d\n", bias_shape.FlatSize());
+printf("[humu]: [conv.h] input_height = %d\n", input_height);
+printf("[humu]: [conv.h] input_width = %d\n", input_width);
+printf("[humu]: [conv.h] filter_height = %d\n", filter_height);
+printf("[humu]: [conv.h] filter_width = %d\n", filter_width);
+printf("[humu]: [conv.h] filter_input_depth = %d\n", filter_input_depth);
+printf("[humu]: [conv.h] groups = %d\n", groups);
+printf("[humu]: [conv.h] filters_per_group = %d\n", filters_per_group);
+printf("[humu]: [conv.h] output_height = %d\n", output_height);
+printf("[humu]: [conv.h] output_width = %d\n", output_width);
+
+
+
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -79,6 +109,10 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
                   (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
                   (in_y < input_height);
 
+
+// printf("[humu]: in loop: (batch, out_y, out_x, out_channel, filter_y, filter_x) = (%d, %d, %d, %d, %d, %d) ; point_in_image? = %d\n", batch, out_y, out_x, out_channel, filter_y, filter_x, is_point_inside_image);
+
+
               if (!is_point_inside_image) {
                 continue;
               }
@@ -90,17 +124,22 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
                 float filter_value = filter_data[Offset(
                     filter_shape, out_channel, filter_y, filter_x, in_channel)];
                 total += (input_value * filter_value);
+
+// printf("[humu]: in 2nd loop: (input_value, filter_value, total) = (%f, %f, %f)\n", input_value, filter_value, total);
+
               }
             }
           }
           float bias_value = 0.0f;
           if (bias_data) {
             bias_value = bias_data[out_channel];
+// printf("[humu]: bias_value = %f\n", bias_value);
           }
           output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
               ActivationFunctionWithMinMax(total + bias_value,
                                            output_activation_min,
                                            output_activation_max);
+// printf("[humu]: (total + bias_value, output_activation_min, output_activation_max) = (%f, %f, %f)\n", total + bias_value, output_activation_min, output_activation_max);
         }
       }
     }

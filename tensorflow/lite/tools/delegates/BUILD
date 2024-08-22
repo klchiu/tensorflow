@@ -43,16 +43,17 @@ cc_library_with_tflite(
     name = "tflite_execution_providers",
     copts = tflite_copts(),
     tflite_deps = [
-        ":xnnpack_delegate_provider",
+        # ":xnnpack_delegate_provider",
+        # ":wolt_delegate_provider",
         ":delegate_provider_lib",
     ],
     deps = [
         ":coreml_delegate_provider",
         ":default_execution_provider",
         ":external_delegate_provider",
-        ":gpu_delegate_provider",
-        ":hexagon_delegate_provider",
-        ":nnapi_delegate_provider",
+        # ":gpu_delegate_provider",
+        # ":hexagon_delegate_provider",
+        # ":nnapi_delegate_provider",
         "//tensorflow/lite/tools/delegates/experimental/stable_delegate:delegate_provider",
     ],
     alwayslink = 1,
@@ -173,6 +174,31 @@ cc_library_with_tflite(
     alwayslink = 1,
 )
 
+#### The following are for using the dummy test delegate in TFLite tooling ####
+cc_library(
+    name = "wolt_delegate_provider",
+    srcs = ["wolt_delegate_provider.cc"],
+    copts = tflite_copts(),
+    deps = [
+        ":wolt_delegate",
+        "//tensorflow/lite/tools/delegates:delegate_provider_hdr",
+    ],
+    alwayslink = 1, # This is required so the optimizer doesn't optimize the library away.
+)
+# cc_library_with_tflite(
+#     name = "wolt_delegate_provider",
+#     srcs = ["wolt_delegate_provider.cc"],
+#     copts = tflite_copts(),
+#     linkstatic = True,
+#     tflite_deps = [
+#         ":delegate_provider_hdr",
+#         "//tensorflow/lite/tools/evaluation:utils",
+#     ],
+#     visibility = ["//visibility:public"],
+#     alwayslink = 1,
+# )
+
+
 cc_library(
     name = "external_delegate_provider",
     srcs = ["external_delegate_provider.cc"],
@@ -205,6 +231,7 @@ cc_test_with_tflite(
         ":delegate_provider_hdr",
         ":delegate_provider_lib",
         ":xnnpack_delegate_provider",
+        ":wolt_delegate_provider",
         "//tensorflow/lite/core/shims:c_shims_test_util",
     ],
     deps = [

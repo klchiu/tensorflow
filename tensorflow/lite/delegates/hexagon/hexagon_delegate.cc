@@ -51,11 +51,17 @@ class HexagonDelegate : public SimpleDelegateInterface {
     if (params_.min_nodes_per_partition <= 0) {
       params_.min_nodes_per_partition = kMinNodesPerHexagonGraph;
     }
+
+        printf("[humu]: hexagon_delegate: HexagonDelegate()\n");
+
   }
 
   bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration,
                                  const TfLiteNode* node,
                                  TfLiteContext* context) const override {
+
+        printf("[humu]: hexagon_delegate: IsNodeSupportedByDelegate()\n");
+
     return IsNodeSupportedByHexagon(registration, node, context);
   }
 
@@ -76,6 +82,10 @@ class HexagonDelegate : public SimpleDelegateInterface {
   }
 
   bool VerifyDelegate() {
+
+        printf("[humu]: hexagon_delegate: VerifyDelegate()\n");
+
+
     auto* hexagon_nn = HexagonNNImplementation();
     if (hexagon_nn == nullptr) {
       return false;
@@ -122,6 +132,10 @@ TfLiteDelegate* TfLiteHexagonDelegateCreate(
   if (!hexagon_delegate_interface->VerifyDelegate()) {
     TFLITE_LOG_PROD_ONCE(tflite::TFLITE_LOG_INFO,
                          "Hexagon Delegate is not supported.\n");
+
+        printf("[humu]: hexagon_delegate: TfLiteHexagonDelegateCreate()\n");
+
+
     return nullptr;
   }
   auto* initialized_delegate =
@@ -130,6 +144,10 @@ TfLiteDelegate* TfLiteHexagonDelegateCreate(
   if (options->enable_dynamic_batch_size) {
     initialized_delegate->flags |= kTfLiteDelegateFlagsAllowDynamicTensors;
   }
+
+
+          printf("[humu]: hexagon_delegate: TfLiteHexagonDelegateCreate()\n");
+
   return initialized_delegate;
 }
 

@@ -15,16 +15,18 @@ limitations under the License.
 #include <string>
 #include <utility>
 
-#include "tensorflow/lite/delegates/utils/dummy_delegate/dummy_delegate.h"
+#include "tensorflow/lite/delegates/wolt/wolt_delegate.h"
 #include "tensorflow/lite/tools/delegates/delegate_provider.h"
+#include "tensorflow/lite/tools/evaluation/utils.h"
+
 
 namespace tflite {
 namespace tools {
 
-class DummyDelegateProvider : public DelegateProvider {
+class WoltDelegateProvider : public DelegateProvider {
  public:
-  DummyDelegateProvider() {
-    default_params_.AddParam("use_dummy_delegate",
+  WoltDelegateProvider() {
+    default_params_.AddParam("use_wolt_delegate",
                              ToolParam::Create<bool>(false));
   }
 
@@ -36,37 +38,37 @@ class DummyDelegateProvider : public DelegateProvider {
   std::pair<TfLiteDelegatePtr, int> CreateRankedTfLiteDelegate(
       const ToolParams& params) const final;
 
-  std::string GetName() const final { return "DummyDelegate"; }
+  std::string GetName() const final { return "WoltDelegate"; }
 };
-REGISTER_DELEGATE_PROVIDER(DummyDelegateProvider);
+REGISTER_DELEGATE_PROVIDER(WoltDelegateProvider);
 
-std::vector<Flag> DummyDelegateProvider::CreateFlags(ToolParams* params) const {
-  std::vector<Flag> flags = {CreateFlag<bool>("use_dummy_delegate", params,
-                                              "use the dummy delegate.")};
+std::vector<Flag> WoltDelegateProvider::CreateFlags(ToolParams* params) const {
+  std::vector<Flag> flags = {CreateFlag<bool>("use_wolt_delegate", params,
+                                              "use the wolt delegate.")};
   return flags;
 }
 
-void DummyDelegateProvider::LogParams(const ToolParams& params,
+void WoltDelegateProvider::LogParams(const ToolParams& params,
                                       bool verbose) const {
-  LOG_TOOL_PARAM(params, bool, "use_dummy_delegate", "Use dummy test delegate",
+  LOG_TOOL_PARAM(params, bool, "use_wolt_delegate", "Use wolt test delegate",
                  verbose);
 }
 
-TfLiteDelegatePtr DummyDelegateProvider::CreateTfLiteDelegate(
+TfLiteDelegatePtr WoltDelegateProvider::CreateTfLiteDelegate(
     const ToolParams& params) const {
-  if (params.Get<bool>("use_dummy_delegate")) {
-    auto default_options = TfLiteDummyDelegateOptionsDefault();
-    return TfLiteDummyDelegateCreateUnique(&default_options);
+  if (params.Get<bool>("use_wolt_delegate")) {
+    auto default_options = TfLiteWoltDelegateOptionsDefault();
+    return TfLiteWoltDelegateCreateUnique(&default_options);
   }
   return TfLiteDelegatePtr(nullptr, [](TfLiteDelegate*) {});
 }
 
 std::pair<TfLiteDelegatePtr, int>
-DummyDelegateProvider::CreateRankedTfLiteDelegate(
+WoltDelegateProvider::CreateRankedTfLiteDelegate(
     const ToolParams& params) const {
   auto ptr = CreateTfLiteDelegate(params);
   return std::make_pair(std::move(ptr),
-                        params.GetPosition<bool>("use_dummy_delegate"));
+                        params.GetPosition<bool>("use_wolt_delegate"));
 }
 }  // namespace tools
 }  // namespace tflite

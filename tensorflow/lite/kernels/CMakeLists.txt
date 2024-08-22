@@ -74,6 +74,7 @@ set(DELEGATE_PROVIDERS
   ${TFLITE_SOURCE_DIR}/tools/delegates/gpu_delegate_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/nnapi_delegate_provider.cc
   ${TFLITE_SOURCE_DIR}/tools/delegates/xnnpack_delegate_provider.cc
+  # ${TFLITE_SOURCE_DIR}/tools/delegates/wolt_delegate_provider.cc
 )
 
 if(TFLITE_ENABLE_EXTERNAL_DELEGATE)
@@ -162,6 +163,7 @@ macro(add_kernel_test TEST_SRC TEST_LIB)
   set_tests_properties(${TEST_NAME} PROPERTIES LABELS "plain")
 
   if(_TFLITE_ENABLE_NNAPI OR TFLITE_ENABLE_EXTERNAL_DELEGATE OR TFLITE_ENABLE_XNNPACK)
+  # if(_TFLITE_ENABLE_NNAPI OR TFLITE_ENABLE_EXTERNAL_DELEGATE OR TFLITE_ENABLE_XNNPACK OR TFLITE_ENABLE_WOLT)
     set(DELEGATE_TEST "${TEST_NAME}_delegate")
     add_test(
       NAME ${DELEGATE_TEST}

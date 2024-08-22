@@ -130,6 +130,17 @@ class DelegateProviders {
         params_.Set<int32_t>("num_threads", s.number_of_threads);
       }
     }
+
+    // Parse settings related to Wolt delegate.
+    if (s.wolt_delegate) {
+      if (!params_.HasParam("use_wolt")) {
+        LOG(WARN) << "Wolt delegate execution provider isn't linked or "
+                     "Wolt delegate isn't supported on the platform!";
+      } else {
+        params_.Set<bool>("use_wolt", true);
+        // params_.Set<int32_t>("num_threads", s.number_of_threads);
+      }
+    }
   }
 
   // Create a list of TfLite delegates based on what have been initialized (i.e.
@@ -215,9 +226,37 @@ void RunInference(Settings* settings,
   model->error_reporter();
   LOG(INFO) << "resolved reporter";
 
-  tflite::ops::builtin::BuiltinOpResolver resolver;
 
-  tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+
+
+  // [humu]: original resolver:
+  // tflite::ops::builtin::BuiltinOpResolver resolver;
+
+
+  // [humu]: might want to switch it to the unique pointer for better coding practice later
+  // std::unique_ptr<tflite::ops::builtin::BuiltinOpResolver> resolver;
+  // if(settings->wolt_delegate){
+  //   resolver = std::make_unique<tflite::ops::builtin::BuiltinOpResolverWithWoltDelegates>();
+  // }
+  // else{
+  //   resolver = std::make_unique<tflite::ops::builtin::BuiltinOpResolverWithoutDefaultDelegates>();
+  // }
+  if(settings->wolt_delegate){
+    LOG(INFO) << "[humu]: Option #1: Wolt";
+    tflite::ops::builtin::BuiltinOpResolverWithWolt resolver;
+    tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+  }
+  else if(settings->xnnpack_delegate){
+    LOG(INFO) << "[humu]: Option #2: XNNPACK";
+      tflite::ops::builtin::BuiltinOpResolverWithXNNPACK resolver;
+      tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+  }
+  else{
+    LOG(INFO) << "[humu]: Option #3: Default";
+    tflite::ops::builtin::BuiltinOpResolverWithoutDefaultDelegates resolver;
+    tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+  }
+
   if (!interpreter) {
     LOG(ERROR) << "Failed to construct interpreter";
     exit(-1);
@@ -266,6 +305,10 @@ void RunInference(Settings* settings,
   auto delegates = delegate_providers.CreateAllDelegates();
   for (auto& delegate : delegates) {
     const auto delegate_name = delegate.provider->GetName();
+
+      LOG(INFO) << "Delegate Name: " << delegate_name;
+
+
     if (interpreter->ModifyGraphWithDelegate(std::move(delegate.delegate)) !=
         kTfLiteOk) {
       LOG(ERROR) << "Failed to apply " << delegate_name << " delegate.";
@@ -421,6 +464,7 @@ void display_usage(const DelegateProviders& delegate_providers) {
       << "\t--verbose, -v: [0|1] print more information\n"
       << "\t--warmup_runs, -w: number of warmup runs\n"
       << "\t--xnnpack_delegate, -x [0:1]: xnnpack delegate\n"
+      << "\t--wolt_delegate, -z [0:1]: xnnpack delegate\n"
       << "\t--help, -h: Print this help message\n";
 }
 
@@ -429,6 +473,7 @@ int Main(int argc, char** argv) {
   bool parse_result = delegate_providers.InitFromCmdlineArgs(
       &argc, const_cast<const char**>(argv));
   if (!parse_result) {
+    LOG(INFO) << "[humu]: Display usage!!";
     display_usage(delegate_providers);
     return EXIT_FAILURE;
   }
@@ -455,17 +500,26 @@ int Main(int argc, char** argv) {
         {"gl_backend", required_argument, nullptr, 'g'},
         {"hexagon_delegate", required_argument, nullptr, 'j'},
         {"xnnpack_delegate", required_argument, nullptr, 'x'},
+        {"wolt_delegate", required_argument, nullptr, 'z'},
         {"help", no_argument, nullptr, 'h'},
         {nullptr, 0, nullptr, 0}};
 
     /* getopt_long stores the option index here. */
     int option_index = 0;
 
+    LOG(INFO) << "[humu]: debug #1";
+
     c = getopt_long(argc, argv, "a:b:c:d:e:f:g:i:j:l:m:p:r:s:t:v:w:x:h",
                     long_options, &option_index);
 
+    LOG(INFO) << "[humu]: debug #2 " << c;
+
+
     /* Detect the end of the options. */
     if (c == -1) break;
+
+    LOG(INFO) << "[humu]: debug #3 " << c;
+
 
     switch (c) {
       case 'a':
@@ -501,6 +555,7 @@ int Main(int argc, char** argv) {
         break;
       case 'm':
         s.model_name = optarg;
+        LOG(INFO) << "[humu]: debug #4: m";
         break;
       case 'p':
         s.profiling =
@@ -528,9 +583,16 @@ int Main(int argc, char** argv) {
       case 'x':
         s.xnnpack_delegate =
             strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
+        LOG(INFO) << "[humu]: debug #4: x";
         break;
+      case 'z':
+        s.wolt_delegate =
+            strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
+        LOG(INFO) << "[humu]: debug #4: z";
+        break;        
       case 'h':
       case '?':
+        LOG(INFO) << "[humu]: debug #4: ?";
         /* getopt_long already printed an error message. */
         display_usage(delegate_providers);
         exit(-1);
@@ -538,6 +600,9 @@ int Main(int argc, char** argv) {
         exit(-1);
     }
   }
+
+LOG(INFO) << "[humu]: debug #5";
+
 
   delegate_providers.MergeSettingsIntoParams(s);
   RunInference(&s, delegate_providers);
@@ -548,5 +613,8 @@ int Main(int argc, char** argv) {
 }  // namespace tflite
 
 int main(int argc, char** argv) {
+  
+  printf("[label_image.cc]: Let's go go go!\n");
+
   return tflite::label_image::Main(argc, argv);
 }

@@ -12,20 +12,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-#include "tensorflow/lite/delegates/utils/dummy_delegate/dummy_delegate.h"
+#include "tensorflow/lite/delegates/wolt/wolt_delegate.h"
 
 #include <memory>
 #include <utility>
 
 #include "tensorflow/lite/delegates/utils/simple_delegate.h"
 
-namespace tflite {
-namespace dummy_test {
+#include "tensorflow/lite/builtin_ops.h"
 
-// Dummy delegate kernel.
-class DummyDelegateKernel : public SimpleDelegateKernelInterface {
+
+
+
+namespace tflite {
+namespace wolt_test {
+
+// Wolt delegate kernel.
+class WoltDelegateKernel : public SimpleDelegateKernelInterface {
  public:
-  explicit DummyDelegateKernel(const DummyDelegateOptions& options)
+  explicit WoltDelegateKernel(const WoltDelegateOptions& options)
       : options_(options) {}
 
   TfLiteStatus Init(TfLiteContext* context,
@@ -42,31 +47,45 @@ class DummyDelegateKernel : public SimpleDelegateKernelInterface {
   }
 
  private:
-  const DummyDelegateOptions options_;
+  const WoltDelegateOptions options_;
 };
 
-// DummyDelegate implements the interface of SimpleDelegateInterface.
+// WoltDelegate implements the interface of SimpleDelegateInterface.
 // This holds the Delegate capabilities.
-class DummyDelegate : public SimpleDelegateInterface {
+class WoltDelegate : public SimpleDelegateInterface {
  public:
-  explicit DummyDelegate(const DummyDelegateOptions& options)
+  explicit WoltDelegate(const WoltDelegateOptions& options)
       : options_(options) {}
   bool IsNodeSupportedByDelegate(const TfLiteRegistration* registration,
                                  const TfLiteNode* node,
                                  TfLiteContext* context) const override {
-    return options_.allowed_builtin_code == registration->builtin_code;
+    
+    // Only supports Add and Sub ops.
+    if (kTfLiteBuiltinAdd != registration->builtin_code &&
+        kTfLiteBuiltinSub != registration->builtin_code){
+          return false;
+        }
+
+    // This delegate only supports float32 types.
+    for (int i = 0; i < node->inputs->size; ++i) {
+      auto& tensor = context->tensors[node->inputs->data[i]];
+      if (tensor.type != kTfLiteFloat32)  return false;
+    }
+    return true;
+    
+    // return options_.allowed_builtin_code == registration->builtin_code;
   }
 
   TfLiteStatus Initialize(TfLiteContext* context) override { return kTfLiteOk; }
 
   const char* Name() const override {
-    static constexpr char kName[] = "DummyDelegate";
+    static constexpr char kName[] = "WoltDelegate";
     return kName;
   }
 
   std::unique_ptr<SimpleDelegateKernelInterface> CreateDelegateKernelInterface()
       override {
-    return std::make_unique<DummyDelegateKernel>(options_);
+    return std::make_unique<WoltDelegateKernel>(options_);
   }
 
   SimpleDelegateInterface::Options DelegateOptions() const override {
@@ -75,31 +94,31 @@ class DummyDelegate : public SimpleDelegateInterface {
   }
 
  private:
-  const DummyDelegateOptions options_;
+  const WoltDelegateOptions options_;
 };
 
-}  // namespace dummy_test
+}  // namespace wolt_test
 }  // namespace tflite
 
-DummyDelegateOptions TfLiteDummyDelegateOptionsDefault() {
-  DummyDelegateOptions options = {0};
-  // Just assign an invalid builtin code so that this dummy test delegate will
+WoltDelegateOptions TfLiteWoltDelegateOptionsDefault() {
+  WoltDelegateOptions options = {0};
+  // Just assign an invalid builtin code so that this wolt test delegate will
   // not support any node by default.
   options.allowed_builtin_code = -1;
   return options;
 }
 
 // Creates a new delegate instance that need to be destroyed with
-// `TfLiteDummyDelegateDelete` when delegate is no longer used by TFLite.
+// `TfLiteWoltDelegateDelete` when delegate is no longer used by TFLite.
 // When `options` is set to `nullptr`, the above default values are used:
-TfLiteDelegate* TfLiteDummyDelegateCreate(const DummyDelegateOptions* options) {
-  std::unique_ptr<tflite::dummy_test::DummyDelegate> dummy(
-      new tflite::dummy_test::DummyDelegate(
-          options ? *options : TfLiteDummyDelegateOptionsDefault()));
-  return tflite::TfLiteDelegateFactory::CreateSimpleDelegate(std::move(dummy));
+TfLiteDelegate* TfLiteWoltDelegateCreate(const WoltDelegateOptions* options) {
+  std::unique_ptr<tflite::wolt_test::WoltDelegate> wolt(
+      new tflite::wolt_test::WoltDelegate(
+          options ? *options : TfLiteWoltDelegateOptionsDefault()));
+  return tflite::TfLiteDelegateFactory::CreateSimpleDelegate(std::move(wolt));
 }
 
-// Destroys a delegate created with `TfLiteDummyDelegateCreate` call.
-void TfLiteDummyDelegateDelete(TfLiteDelegate* delegate) {
+// Destroys a delegate created with `TfLiteWoltDelegateCreate` call.
+void TfLiteWoltDelegateDelete(TfLiteDelegate* delegate) {
   tflite::TfLiteDelegateFactory::DeleteSimpleDelegate(delegate);
 }

@@ -920,6 +920,9 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
 
+printf("[humu]: [optimized_ops.h] debug 1\n");
+
+
   ruy::profiler::ScopeLabel label("Conv");
 
   // NB: the float 0.0f value is represented by all zero bytes.
@@ -932,22 +935,38 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
       dilation_width_factor != 1 || dilation_height_factor != 1;
   const bool need_im2col = stride_width != 1 || stride_height != 1 ||
                            filter_width != 1 || filter_height != 1;
+
+
+printf("[humu]: [optimized_ops.h] debug 1.1\n");
+
+
   if (need_dilated_im2col) {
+    
+    printf("[humu]: [optimized_ops.h] debug 1.2\n");
+
     DilatedIm2col(params, float_zero_byte, input_shape, input_data,
                   filter_shape, output_shape, im2col_data);
     gemm_input_data = im2col_data;
     gemm_input_shape = &im2col_shape;
   } else if (need_im2col) {
+
+    printf("[humu]: [optimized_ops.h] debug 1.3\n");
+
     TFLITE_DCHECK(im2col_data);
     Im2col(params, filter_height, filter_width, float_zero_byte, input_shape,
            input_data, im2col_shape, im2col_data);
     gemm_input_data = im2col_data;
     gemm_input_shape = &im2col_shape;
   } else {
+
+    printf("[humu]: [optimized_ops.h] debug 1.4\n");
+
     TFLITE_DCHECK(!im2col_data);
     gemm_input_data = input_data;
     gemm_input_shape = &input_shape;
   }
+
+printf("[humu]: [optimized_ops.h] debug 2\n");
 
   const int gemm_input_dims = gemm_input_shape->DimensionsCount();
   int m = FlatSizeSkipDim(*gemm_input_shape, gemm_input_dims - 1);
@@ -969,6 +988,8 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   int stride_b = k;
   int stride_c = n;
 
+printf("[humu]: [optimized_ops.h] debug 3\n");
+
   cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, k, 1.0f, a,
               stride_a, b, stride_b, 0.0f, c, stride_c);
   optimized_ops::AddBiasAndEvalActivationFunction(
@@ -977,6 +998,9 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
 #else
   // When an optimized CBLAS implementation is not available, fall back
   // to using cpu_backend_gemm.
+
+printf("[humu]: [optimized_ops.h] debug 4\n");
+
   cpu_backend_gemm::MatrixParams<float> lhs_params;
   lhs_params.order = cpu_backend_gemm::Order::kRowMajor;
   lhs_params.rows = n;
@@ -993,9 +1017,15 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   gemm_params.bias = bias_data;
   gemm_params.clamp_min = output_activation_min;
   gemm_params.clamp_max = output_activation_max;
+
+printf("[humu]: [optimized_ops.h] debug 5\n");
+
   cpu_backend_gemm::Gemm(lhs_params, filter_data, rhs_params, gemm_input_data,
                          dst_params, output_data, gemm_params,
                          cpu_backend_context);
+
+printf("[humu]: [optimized_ops.h] debug 6\n");
+
 #endif  //  defined(TF_LITE_USE_CBLAS) && defined(__APPLE__)
 }
 

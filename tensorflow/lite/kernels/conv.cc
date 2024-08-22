@@ -892,6 +892,9 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
                const TfLiteTensor* input, const TfLiteTensor* filter,
                const TfLiteTensor* bias, TfLiteTensor* im2col,
                TfLiteTensor* hwcn_weights, TfLiteTensor* output) {
+  printf("[humu]: [conv.cc] EvalFloat\n");
+
+
   float output_activation_min, output_activation_max;
   CalculateActivationRange(params->activation, &output_activation_min,
                            &output_activation_max);
@@ -936,8 +939,25 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
   op_params.dilation_height_factor = params->dilation_height_factor;
   op_params.float_activation_min = output_activation_min;
   op_params.float_activation_max = output_activation_max;
+
+  printf("[humu]: [conv.cc] EvalFloat, op_params.padding_type = %d\n", op_params.padding_type);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.padding_values.width = %d\n", op_params.padding_values.width);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.padding_values.height = %d\n", op_params.padding_values.height);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.stride_width = %d\n", op_params.stride_width);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.stride_height = %d\n", op_params.stride_height);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.dilation_width_factor = %d\n", op_params.dilation_width_factor);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.dilation_height_factor = %d\n", op_params.dilation_height_factor);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.float_activation_min = %f\n", op_params.float_activation_min);
+  printf("[humu]: [conv.cc] EvalFloat, op_params.float_activation_max = %f\n", op_params.float_activation_max);
+
+
+
+  effective_kernel_type = kGenericOptimized;
+  printf("[humu]: [conv.cc] EvalFloat, effective_kernel_type = %d\n", effective_kernel_type);
+
   switch (effective_kernel_type) {
     case kReference: {
+      printf("[humu]: [conv.cc] EvalFloat, kReference\n");
       reference_ops::Conv(op_params, GetTensorShape(input),
                           GetTensorData<float>(input), GetTensorShape(filter),
                           GetTensorData<float>(filter), GetTensorShape(bias),
@@ -948,6 +968,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
     }
     case kCblasOptimized:
     case kGenericOptimized: {
+      printf("[humu]: [conv.cc] EvalFloat, kGenericOptimized\n");
       optimized_ops::Conv(op_params, GetTensorShape(input),
                           GetTensorData<float>(input), GetTensorShape(filter),
                           GetTensorData<float>(filter), GetTensorShape(bias),
@@ -965,6 +986,7 @@ void EvalFloat(TfLiteContext* context, TfLiteNode* node,
       } else {
         filter_data = GetTensorData<float>(filter);
       }
+      printf("[humu]: [conv.cc] EvalFloat, multithreaded\n");
       multithreaded_ops::Conv(
           *eigen_support::GetThreadPoolDevice(context), op_params,
           GetTensorShape(input), GetTensorData<float>(input),
@@ -1201,6 +1223,10 @@ TfLiteStatus EvalImpl(TfLiteContext* context, TfLiteNode* node) {
     data->have_weights_been_transposed = true;
   }
 
+
+  printf("[humu]: [conv.cc] EvalImpl\n");
+
+
   TFLITE_DCHECK_EQ(input_type, input->type);
   switch (input_type) {  // Already know in/outtypes are same.
     case kTfLiteFloat32:
@@ -1222,6 +1248,7 @@ TfLiteStatus EvalImpl(TfLiteContext* context, TfLiteNode* node) {
                                                     accum_scratch, output));
         }
       } else {
+        printf("[humu]: [conv.cc] EvalImpl, EvalFloat\n");
         EvalFloat<kernel_type>(context, node, params, data, input, filter, bias,
                                im2col, hwcn_weights, output);
       }

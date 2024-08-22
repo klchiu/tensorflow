@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_DELEGATES_UTILS_DUMMY_DELEGATE_DUMMY_DELEGATE_H_
-#define TENSORFLOW_LITE_DELEGATES_UTILS_DUMMY_DELEGATE_DUMMY_DELEGATE_H_
+#ifndef TENSORFLOW_LITE_DELEGATES_WOLT_WOLT_DELEGATE_H_
+#define TENSORFLOW_LITE_DELEGATES_WOLT_WOLT_DELEGATE_H_
 
 #include <memory>
 
@@ -33,18 +33,18 @@ typedef struct {
   bool error_during_prepare;
   // Report error during invoke.
   bool error_during_invoke;
-} DummyDelegateOptions;
+} WoltDelegateOptions;
 
 // Returns a structure with the default delegate options.
-DummyDelegateOptions TfLiteDummyDelegateOptionsDefault();
+WoltDelegateOptions TfLiteWoltDelegateOptionsDefault();
 
 // Creates a new delegate instance that needs to be destroyed with
-// `TfLiteDummyDelegateDelete` when delegate is no longer used by TFLite.
+// `TfLiteWoltDelegateDelete` when delegate is no longer used by TFLite.
 // When `options` is set to `nullptr`, the above default values are used:
-TfLiteDelegate* TfLiteDummyDelegateCreate(const DummyDelegateOptions* options);
+TfLiteDelegate* TfLiteWoltDelegateCreate(const WoltDelegateOptions* options);
 
-// Destroys a delegate created with `TfLiteDummyDelegateCreate` call.
-void TfLiteDummyDelegateDelete(TfLiteDelegate* delegate);
+// Destroys a delegate created with `TfLiteWoltDelegateCreate` call.
+void TfLiteWoltDelegateDelete(TfLiteDelegate* delegate);
 
 #ifdef __cplusplus
 }
@@ -53,9 +53,9 @@ void TfLiteDummyDelegateDelete(TfLiteDelegate* delegate);
 // A convenient wrapper that returns C++ std::unique_ptr for automatic memory
 // management.
 inline std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>
-TfLiteDummyDelegateCreateUnique(const DummyDelegateOptions* options) {
+TfLiteWoltDelegateCreateUnique(const WoltDelegateOptions* options) {
   return std::unique_ptr<TfLiteDelegate, void (*)(TfLiteDelegate*)>(
-      TfLiteDummyDelegateCreate(options), TfLiteDummyDelegateDelete);
+      TfLiteWoltDelegateCreate(options), TfLiteWoltDelegateDelete);
 }
 
-#endif  // TENSORFLOW_LITE_DELEGATES_UTILS_DUMMY_DELEGATE_DUMMY_DELEGATE_H_
+#endif  // TENSORFLOW_LITE_DELEGATES_WOLT_WOLT_DELEGATE_H_

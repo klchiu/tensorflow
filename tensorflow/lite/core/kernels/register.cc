@@ -385,6 +385,15 @@ BuiltinOpResolverWithXNNPACK::BuiltinOpResolverWithXNNPACK() {
   });
 }
 
+BuiltinOpResolverWithWolt::BuiltinOpResolverWithWolt() {
+  delegate_creators_.clear();
+  delegate_creators_.push_back([](TfLiteContext* context) {
+    return tflite::MaybeCreateXNNPACKDelegate(
+        context, /*enable_xnnpack_unsigned_quantized=*/false);
+  });
+}
+
+
 }  // namespace builtin
 }  // namespace ops
 }  // namespace tflite

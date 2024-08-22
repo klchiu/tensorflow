@@ -491,9 +491,10 @@ class Delegate {
     }
 
 #endif
+printf("[humu]: before Created TensorFlow Lite\n");
     TFLITE_LOG_PROD_ONCE(tflite::TFLITE_LOG_INFO,
                          "Created TensorFlow Lite XNNPACK delegate for CPU.");
-
+printf("[humu]: after Created TensorFlow Lite\n");
     options_ =
         options != nullptr ? *options : TfLiteXNNPackDelegateOptionsDefault();
     workspace_.reset(workspace);
@@ -2168,6 +2169,9 @@ class Subgraph {
     // messages are passed to TFLite. When we detect supported operations
     // (subgraph is null), logging context is null, and error messages are
     // supressed.
+
+    printf("[humu]: xnnpack_delegate: VisitNode(), builtin_code = %d\n", registration->builtin_code);
+
     TfLiteContext* logging_context = subgraph == nullptr ? nullptr : context;
     switch (registration->builtin_code) {
       case kTfLiteBuiltinAbs:
@@ -2206,6 +2210,9 @@ class Subgraph {
       case kTfLiteBuiltinConv2d: {
         const TfLiteConvParams* conv_params =
             static_cast<const TfLiteConvParams*>(node->builtin_data);
+        
+        printf("[humu]: xnnpack_delegate: Conv2d\n");
+
 
         return VisitConv2DNode(subgraph, delegate, logging_context, node_index,
                                node, context->tensors, conv_params,
@@ -2214,6 +2221,9 @@ class Subgraph {
       case kTfLiteBuiltinDepthwiseConv2d: {
         const TfLiteDepthwiseConvParams* dwconv_params =
             static_cast<const TfLiteDepthwiseConvParams*>(node->builtin_data);
+
+        printf("[humu]: xnnpack_delegate: DepthwiseConv2d\n");
+
 
         return VisitDepthwiseConv2DNode(subgraph, delegate, logging_context,
                                         node_index, node, context->tensors,
@@ -2958,6 +2968,14 @@ class Subgraph {
     const int kernel_width = SizeOfDimension(&filter_tensor, 2);
     const int input_channels = SizeOfDimension(&filter_tensor, 3);
     const int groups = SizeOfDimension(&input_tensor, 3) / input_channels;
+
+
+    printf("[humu]: xnnpack_delegate: VisitConv2DNode: output_channels = %d\n", output_channels);
+    printf("[humu]: xnnpack_delegate: VisitConv2DNode: kernel_height = %d\n", kernel_height);
+    printf("[humu]: xnnpack_delegate: VisitConv2DNode: kernel_width = %d\n", kernel_width);
+    printf("[humu]: xnnpack_delegate: VisitConv2DNode: input_channels = %d\n", input_channels);
+    printf("[humu]: xnnpack_delegate: VisitConv2DNode: groups = %d\n", groups);
+
 
     uint32_t flags;
     TF_LITE_ENSURE_STATUS(CalculatePadding(

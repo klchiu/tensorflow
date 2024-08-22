@@ -54,6 +54,12 @@ class BuiltinOpResolverWithoutDefaultDelegates : public BuiltinOpResolver {
   }
 };
 
+class BuiltinOpResolverWithWolt : public BuiltinOpResolver {
+ public:
+  BuiltinOpResolverWithWolt();
+};
+
+
 }  // namespace builtin
 }  // namespace ops
 }  // namespace tflite
